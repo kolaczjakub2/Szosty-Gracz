@@ -1,0 +1,19 @@
+<div class="story-deck" aria-label="Wybór najważniejszych wpisów">
+  @for (article of articles(); track article.id; let index = $index) {
+    <button
+      type="button"
+      class="story-deck__item"
+      [class.story-deck__item--active]="isActiveSlide(index)"
+      [attr.data-slide-index]="index"
+      (click)="slideSelected.emit(index)"
+    >
+      <span class="story-deck__number">{{ slideLabel(index) }}</span>
+      <img [src]="article.imageUrl" [alt]="article.imageAlt" />
+      <span class="story-deck__copy">
+        <span class="eyebrow">{{ article.category }}</span>
+        <strong>{{ article.title }}</strong>
+        <span>{{ article.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+      </span>
+    </button>
+  }
+</div>

@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 import { NavItem, TeamFilter } from '../../models/ui';
+import { ActiveFilter } from '../active-filter/active-filter';
+import { HeaderNav } from '../header-nav/header-nav';
+import { HeaderTopbar } from '../header-topbar/header-topbar';
+import { TeamStrip } from '../team-strip/team-strip';
 
 @Component({
   selector: 'app-site-header',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [ActiveFilter, HeaderNav, HeaderTopbar, TeamStrip],
   templateUrl: './site-header.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,8 +24,4 @@ export class SiteHeader {
   readonly navItemSelected = output<NavItem>();
   readonly teamSelected = output<TeamFilter>();
   readonly filterCleared = output<void>();
-
-  navItemKey(item: NavItem): string {
-    return `${item.taxonomy}:${item.slug}`;
-  }
 }

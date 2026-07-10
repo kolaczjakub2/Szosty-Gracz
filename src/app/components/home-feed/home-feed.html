@@ -1,0 +1,44 @@
+@let leadVm = leadViewModel();
+@let archiveVm = archiveViewModel();
+
+@if (leadVm.loading) {
+  <section class="loading-state">
+    <mat-spinner diameter="44"></mat-spinner>
+  </section>
+} @else if (leadVm.error) {
+  <section class="error-state">
+    <mat-icon>cloud_off</mat-icon>
+    <p>{{ leadVm.error }}</p>
+  </section>
+} @else if (leadVm.hero; as hero) {
+  <app-lead-grid
+    [hero]="hero"
+    [sideArticles]="leadVm.sideArticles"
+    (articleOpened)="articleOpened.emit($event)"
+  />
+
+  <app-news-ticker
+    [label]="tickerLabel()"
+    [articles]="leadVm.latest.slice(0, 3)"
+    (articleOpened)="articleOpened.emit($event)"
+  />
+
+  <section id="archive-section" class="content-grid">
+    <app-latest-panel
+      [title]="archiveTitle()"
+      [articles]="archiveVm.posts"
+      [page]="archiveVm.page"
+      [total]="archiveVm.total"
+      [totalPages]="archiveVm.totalPages"
+      [pages]="archivePages()"
+      (articleOpened)="articleOpened.emit($event)"
+      (pageSelected)="pageSelected.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="empty-state">
+    <mat-icon>filter_alt_off</mat-icon>
+    <p>Brak wpisów dla tego filtra.</p>
+    <button matButton type="button" (click)="filterCleared.emit()">Wyczyść filtr</button>
+  </section>
+}

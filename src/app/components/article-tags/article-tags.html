@@ -1,0 +1,10 @@
+@if (tags().length) {
+  <section class="article-tags" aria-label="Tagi wpisu">
+    <h2>Tagi</h2>
+    <div>
+      @for (tag of tags(); track tag.id) {
+        <button matButton type="button" (click)="tagSelected.emit(tag)">#{{ tag.name }}</button>
+      }
+    </div>
+  </section>
+}

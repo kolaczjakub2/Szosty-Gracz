@@ -1,0 +1,31 @@
+<section class="comments-panel" aria-label="Komentarze">
+  <div class="panel-heading">
+    <h2>Komentarze</h2>
+    <span>{{ commentCount() }}</span>
+  </div>
+
+  @if (comments().length) {
+    <div class="comment-list">
+      @for (comment of comments(); track comment.id) {
+        <article
+          class="comment-card"
+          [class.comment-card--reply]="comment.depth > 0"
+          [style.--comment-depth]="comment.depth"
+        >
+          <header>
+            <strong>
+              @if (comment.depth > 0) {
+                <mat-icon aria-hidden="true" fontIcon="subdirectory_arrow_right"></mat-icon>
+              }
+              {{ comment.authorName }}
+            </strong>
+            <span>{{ comment.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+          </header>
+          <div [innerHTML]="comment.contentHtml"></div>
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="comments-panel__empty">Ten wpis nie ma jeszcze komentarzy.</p>
+  }
+</section>

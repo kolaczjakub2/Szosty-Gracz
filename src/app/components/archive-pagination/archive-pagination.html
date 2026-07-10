@@ -1,0 +1,40 @@
+@if (totalPages() > 1) {
+  <nav class="archive-pagination" aria-label="Paginacja archiwum">
+    <button
+      matIconButton
+      type="button"
+      [disabled]="page() <= 1"
+      aria-label="Poprzednia strona"
+      (click)="pageSelected.emit(page() - 1)"
+    >
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+
+    <div class="archive-pagination__pages">
+      @for (item of pages(); track item) {
+        <button
+          matButton
+          type="button"
+          class="archive-pagination__page"
+          [class.archive-pagination__page--active]="item === page()"
+          [attr.aria-current]="item === page() ? 'page' : null"
+          (click)="pageSelected.emit(item)"
+        >
+          {{ item }}
+        </button>
+      }
+    </div>
+
+    <span class="archive-pagination__status">Strona {{ page() }} z {{ totalPages() }}</span>
+
+    <button
+      matIconButton
+      type="button"
+      [disabled]="page() >= totalPages()"
+      aria-label="Następna strona"
+      (click)="pageSelected.emit(page() + 1)"
+    >
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+  </nav>
+}

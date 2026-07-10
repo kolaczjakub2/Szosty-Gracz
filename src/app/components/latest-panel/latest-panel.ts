@@ -1,14 +1,13 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 
 import { Article } from '../../models/wordpress';
+import { ArchiveCard } from '../archive-card/archive-card';
+import { ArchivePagination } from '../archive-pagination/archive-pagination';
 
 @Component({
   selector: 'app-latest-panel',
-  imports: [DatePipe, MatButtonModule, MatCardModule, MatIconModule],
+  imports: [ArchiveCard, ArchivePagination, MatCardModule],
   templateUrl: './latest-panel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

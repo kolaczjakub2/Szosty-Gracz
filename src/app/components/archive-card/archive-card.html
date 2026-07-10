@@ -1,0 +1,25 @@
+<a
+  class="archive-card story-link"
+  [href]="article().link"
+  target="_blank"
+  rel="noreferrer"
+  (click)="$event.preventDefault(); articleOpened.emit(article())"
+>
+  <span class="archive-card__media">
+    <img [src]="article().imageUrl" [alt]="article().imageAlt" />
+    <span>{{ article().category }}</span>
+  </span>
+
+  <span class="archive-card__body">
+    <span class="archive-card__meta">
+      <span>{{ article().date | date: 'dd.MM.yyyy' }}</span>
+      <span>{{ article().date | date: 'HH:mm' }}</span>
+    </span>
+    <strong>{{ article().title }}</strong>
+    <span class="archive-card__excerpt">{{ article().excerpt }}</span>
+    <span class="archive-card__cta">
+      Czytaj artykuł
+      <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+    </span>
+  </span>
+</a>

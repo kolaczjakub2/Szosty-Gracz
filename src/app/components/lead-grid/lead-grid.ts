@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,14 +7,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 import { Article } from '../../models/wordpress';
+import { LeadCarousel } from '../lead-carousel/lead-carousel';
+import { StoryDeck } from '../story-deck/story-deck';
 
 @Component({
   selector: 'app-lead-grid',
-  imports: [DatePipe, MatButtonModule, MatIconModule],
+  imports: [LeadCarousel, StoryDeck],
   templateUrl: './lead-grid.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -36,6 +35,8 @@ export class LeadGrid implements OnDestroy {
   readonly progressPercent = computed(
     () => ((this.normalizedIndex() + 1) / this.featureArticles().length) * 100,
   );
+  readonly currentSlideLabel = computed(() => this.slideLabel(this.normalizedIndex()));
+  readonly totalSlideLabel = computed(() => this.slideLabel(this.featureArticles().length - 1));
   private autoplayId = window.setInterval(() => this.nextSlide(false), 6500);
 
   ngOnDestroy(): void {
@@ -70,11 +71,7 @@ export class LeadGrid implements OnDestroy {
     this.restartAutoplay();
   }
 
-  isActiveSlide(index: number): boolean {
-    return index === this.normalizedIndex();
-  }
-
-  slideLabel(index: number): string {
+  private slideLabel(index: number): string {
     return String(index + 1).padStart(2, '0');
   }
 

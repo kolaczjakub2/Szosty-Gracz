@@ -1,0 +1,63 @@
+<div
+  class="hero-carousel"
+  (mouseenter)="autoplayPaused.emit()"
+  (mouseleave)="autoplayResumed.emit()"
+  (focusin)="autoplayPaused.emit()"
+  (focusout)="autoplayResumed.emit()"
+>
+  <a
+    class="hero-story story-link"
+    [href]="article().link"
+    target="_blank"
+    rel="noreferrer"
+    (click)="$event.preventDefault(); articleOpened.emit(article())"
+  >
+    <img class="hero-story__image" [src]="article().imageUrl" [alt]="article().imageAlt" />
+    <span class="hero-story__scan" aria-hidden="true"></span>
+    <span class="hero-story__court" aria-hidden="true"></span>
+
+    <div class="hero-story__frame" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="hero-story__content">
+      <div class="hero-story__kicker">
+        <span class="eyebrow">{{ article().category }}</span>
+        <span class="hero-story__date">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          {{ article().date | date: 'dd.MM.yyyy, HH:mm' }}
+        </span>
+      </div>
+      <h1>{{ article().title }}</h1>
+      <p>{{ article().excerpt }}</p>
+      <div class="hero-story__actions">
+        <span class="hero-story__cta">
+          Czytaj artykuł
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+        </span>
+      </div>
+    </div>
+  </a>
+
+  <div class="hero-carousel__controls" aria-label="Sterowanie karuzelą">
+    <button
+      matIconButton
+      type="button"
+      aria-label="Poprzedni artykuł"
+      (click)="previousSelected.emit()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span>{{ currentLabel() }} / {{ totalLabel() }}</span>
+    <button matIconButton type="button" aria-label="Następny artykuł" (click)="nextSelected.emit()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="hero-carousel__progress" aria-hidden="true">
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
+</div>

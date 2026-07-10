@@ -9,72 +9,14 @@
 
   <div class="archive-grid">
     @for (article of articles(); track article.id) {
-      <a
-        class="archive-card story-link"
-        [href]="article.link"
-        target="_blank"
-        rel="noreferrer"
-        (click)="$event.preventDefault(); articleOpened.emit(article)"
-      >
-        <span class="archive-card__media">
-          <img [src]="article.imageUrl" [alt]="article.imageAlt" />
-          <span>{{ article.category }}</span>
-        </span>
-
-        <span class="archive-card__body">
-          <span class="archive-card__meta">
-            <span>{{ article.date | date: 'dd.MM.yyyy' }}</span>
-            <span>{{ article.date | date: 'HH:mm' }}</span>
-          </span>
-          <strong>{{ article.title }}</strong>
-          <span class="archive-card__excerpt">{{ article.excerpt }}</span>
-          <span class="archive-card__cta">
-            Czytaj artykuł
-            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
-          </span>
-        </span>
-      </a>
+      <app-archive-card [article]="article" (articleOpened)="articleOpened.emit($event)" />
     }
   </div>
 
-  @if (totalPages() > 1) {
-    <nav class="archive-pagination" aria-label="Paginacja archiwum">
-      <button
-        matIconButton
-        type="button"
-        [disabled]="page() <= 1"
-        aria-label="Poprzednia strona"
-        (click)="pageSelected.emit(page() - 1)"
-      >
-        <mat-icon aria-hidden="true">chevron_left</mat-icon>
-      </button>
-
-      <div class="archive-pagination__pages">
-        @for (item of pages(); track item) {
-          <button
-            matButton
-            type="button"
-            class="archive-pagination__page"
-            [class.archive-pagination__page--active]="item === page()"
-            [attr.aria-current]="item === page() ? 'page' : null"
-            (click)="pageSelected.emit(item)"
-          >
-            {{ item }}
-          </button>
-        }
-      </div>
-
-      <span class="archive-pagination__status">Strona {{ page() }} z {{ totalPages() }}</span>
-
-      <button
-        matIconButton
-        type="button"
-        [disabled]="page() >= totalPages()"
-        aria-label="Następna strona"
-        (click)="pageSelected.emit(page() + 1)"
-      >
-        <mat-icon aria-hidden="true">chevron_right</mat-icon>
-      </button>
-    </nav>
-  }
+  <app-archive-pagination
+    [page]="page()"
+    [totalPages]="totalPages()"
+    [pages]="pages()"
+    (pageSelected)="pageSelected.emit($event)"
+  />
 </mat-card>

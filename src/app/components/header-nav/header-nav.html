@@ -1,0 +1,14 @@
+<nav class="category-nav" aria-label="Główna nawigacja">
+  @for (item of navItems(); track item.label) {
+    <button
+      matButton
+      type="button"
+      class="category-nav__item"
+      [class.category-nav__item--active]="activeNavItemKey() === navItemKey(item)"
+      [attr.aria-pressed]="activeNavItemKey() === navItemKey(item)"
+      (click)="navItemSelected.emit(item)"
+    >
+      {{ item.label }}
+    </button>
+  }
+</nav>

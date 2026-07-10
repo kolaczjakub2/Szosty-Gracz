@@ -1,0 +1,26 @@
+<div class="team-strip shell" aria-label="Skróty drużyn NBA">
+  <button
+    matButton
+    type="button"
+    class="league-chip"
+    [class.league-chip--active]="allFeedSelected()"
+    (click)="filterCleared.emit()"
+  >
+    NBA
+  </button>
+  @for (team of teams(); track team.code) {
+    <button
+      matButton
+      type="button"
+      class="team-chip"
+      [class.team-chip--active]="selectedTeam()?.code === team.code"
+      [attr.aria-label]="'Filtruj: ' + team.name"
+      [attr.aria-pressed]="selectedTeam()?.code === team.code"
+      [title]="team.name"
+      (click)="teamSelected.emit(team)"
+    >
+      <img [src]="team.logoUrl" [alt]="team.code" loading="lazy" />
+      <span>{{ team.code }}</span>
+    </button>
+  }
+</div>

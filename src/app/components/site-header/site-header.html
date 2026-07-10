@@ -1,0 +1,85 @@
+<header class="site-header">
+  <div class="topbar shell">
+    <div class="topbar__links">
+      <a matButton href="https://szostygracz.pl/wspieraj/" target="_blank" rel="noreferrer">
+        <mat-icon>favorite_border</mat-icon>
+        WSPIERAJ 6G
+      </a>
+      <a matButton href="https://szostygracz.pl/moje-konto/" target="_blank" rel="noreferrer">
+        <mat-icon>person_outline</mat-icon>
+        Moje konto
+      </a>
+      <a matButton href="https://szostygracz.pl/alert-meczowy/" target="_blank" rel="noreferrer">
+        <mat-icon>notifications_none</mat-icon>
+        Alert meczowy
+      </a>
+    </div>
+  </div>
+
+  <div class="masthead shell">
+    <a
+      class="brand"
+      href="/"
+      aria-label="Szósty Gracz"
+      (click)="$event.preventDefault(); homeSelected.emit()"
+    >
+      <img [src]="logoUrl()" alt="Szósty Gracz" />
+    </a>
+
+    <nav class="category-nav" aria-label="Główna nawigacja">
+      @for (item of navItems(); track item.label; let first = $first) {
+        <button
+          matButton
+          type="button"
+          class="category-nav__item"
+          [class.category-nav__item--active]="activeNavItemKey() === navItemKey(item)"
+          [attr.aria-pressed]="activeNavItemKey() === navItemKey(item)"
+          (click)="navItemSelected.emit(item)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </nav>
+  </div>
+
+
+  <div class="team-strip shell" aria-label="Skróty drużyn NBA">
+    <button
+      matButton
+      type="button"
+      class="league-chip"
+      [class.league-chip--active]="allFeedSelected()"
+      (click)="filterCleared.emit()"
+    >
+      NBA
+    </button>
+    @for (team of teams(); track team.code) {
+      <button
+        matButton
+        type="button"
+        class="team-chip"
+        [class.team-chip--active]="selectedTeam()?.code === team.code"
+        [attr.aria-label]="'Filtruj: ' + team.name"
+        [attr.aria-pressed]="selectedTeam()?.code === team.code"
+        [title]="team.name"
+        (click)="teamSelected.emit(team)"
+      >
+        <img [src]="team.logoUrl" [alt]="team.code" loading="lazy" />
+        <span>{{ team.code }}</span>
+      </button>
+    }
+  </div>
+
+  @if (selectedTeam(); as team) {
+    <div class="active-filter shell" aria-live="polite">
+      <span>
+        <mat-icon>filter_alt</mat-icon>
+        {{ team.name }}
+      </span>
+      <button matButton type="button" (click)="filterCleared.emit()">
+        Wyczyść
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+</header>

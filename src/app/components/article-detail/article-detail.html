@@ -1,0 +1,104 @@
+@let vm = viewModel();
+
+<section class="article-detail">
+  <button
+    matButton
+    type="button"
+    class="article-detail__back"
+    aria-label="Wróć do listy"
+    (click)="closed.emit()"
+  >
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Wróć do listy
+  </button>
+
+  @if (vm.loading) {
+    <div class="loading-state article-detail__loading">
+      <mat-spinner diameter="44"></mat-spinner>
+    </div>
+  } @else if (vm.error) {
+    <div class="error-state">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ vm.error }}</p>
+    </div>
+  } @else if (vm.article; as article) {
+    <article>
+      <header class="article-detail__header">
+        @if (article.primaryTerm; as primaryTerm) {
+          <button
+            type="button"
+            class="eyebrow eyebrow--button"
+            [attr.aria-label]="'Pokaż wpisy: ' + article.category"
+            (click)="termSelected.emit(primaryTerm)"
+          >
+            {{ article.category }}
+          </button>
+        } @else {
+          <span class="eyebrow">{{ article.category }}</span>
+        }
+        <h1>{{ article.title }}</h1>
+        <div class="article-detail__meta">
+          <span>Autor: {{ article.authorName }}</span>
+          <span>Data: {{ article.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+        </div>
+      </header>
+      <div class="article-detail__content" [innerHTML]="article.contentHtml"></div>
+
+      <a
+        matButton
+        class="article-detail__source"
+        [href]="article.link"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Otwórz oryginał
+        <mat-icon aria-hidden="true">north_east</mat-icon>
+      </a>
+
+      @if (article.tags.length) {
+        <section class="article-tags" aria-label="Tagi wpisu">
+          <h2>Tagi</h2>
+          <div>
+            @for (tag of article.tags; track tag.id) {
+              <button matButton type="button" (click)="tagSelected.emit(tag)">
+                #{{ tag.name }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </article>
+
+    <section class="comments-panel" aria-label="Komentarze">
+      <div class="panel-heading">
+        <h2>Komentarze</h2>
+        <span>{{ vm.commentCount }}</span>
+      </div>
+
+      @if (vm.comments.length) {
+        <div class="comment-list">
+          @for (comment of vm.comments; track comment.id) {
+            <article
+              class="comment-card"
+              [class.comment-card--reply]="comment.depth > 0"
+              [style.--comment-depth]="comment.depth"
+            >
+              <header>
+                <strong>
+                  @if (comment.depth > 0) {
+                    <mat-icon aria-hidden="true" fontIcon="subdirectory_arrow_right"></mat-icon>
+                  }
+                  {{ comment.authorName }}
+                </strong>
+                <span>{{ comment.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+              </header>
+              <div [innerHTML]="comment.contentHtml"></div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="comments-panel__empty">Ten wpis nie ma jeszcze komentarzy.</p>
+      }
+    </section>
+  }
+</section>

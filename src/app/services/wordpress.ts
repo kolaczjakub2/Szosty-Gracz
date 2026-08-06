@@ -74,9 +74,20 @@ export class Wordpress {
   constructor(private readonly http: HttpClient) {}
 
   getLatestPosts(page = 1, perPage = 16): Observable<PaginatedArticles> {
-    const params = this.postsParams(page, perPage).set('_sg_cb', Date.now().toString());
+    const params = this.postsParams(page, perPage);
 
-    return this.getPaginatedPosts(params, page);
+    return this.http
+      .get<WpPost[]>('/api/latest-posts', { params, observe: 'response' })
+      .pipe(
+        switchMap((response) => this.toArticles(response.body ?? []).pipe(
+          map((articles) => ({
+            articles,
+            total: Number(response.headers.get('X-WP-Total') ?? 0),
+            totalPages: Number(response.headers.get('X-WP-TotalPages') ?? 0),
+            page,
+          })),
+        )),
+      );
   }
 
   getRandomArchivePosts(count = 4): Observable<Article[]> {

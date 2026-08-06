@@ -1,12 +1,30 @@
 <a
   class="archive-card story-link"
-  [href]="article().link"
-  target="_blank"
-  rel="noreferrer"
+  [href]="articlePath(article())"
   (click)="$event.preventDefault(); articleOpened.emit(article())"
 >
   <span class="archive-card__media">
-    <img [src]="article().imageUrl" [alt]="article().imageAlt" />
+    <img
+      class="archive-card__media-backdrop"
+      [src]="optimizedImageUrl(article().thumbnailUrl || article().imageUrl, 180, 48)"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      width="420"
+      height="280"
+    />
+    <img
+      class="archive-card__media-image"
+      [src]="optimizedImageUrl(article().thumbnailUrl || article().imageUrl, 420, 68)"
+      [srcset]="optimizedImageSrcset(article().thumbnailUrl || article().imageUrl, [220, 320, 420, 640])"
+      sizes="(max-width: 760px) calc((100vw - 56px) / 2), (max-width: 1200px) 34vw, 420px"
+      [alt]="article().imageAlt"
+      loading="lazy"
+      decoding="async"
+      width="420"
+      height="280"
+    />
     <span>{{ article().category }}</span>
   </span>
 
@@ -19,7 +37,7 @@
     <span class="archive-card__excerpt">{{ article().excerpt }}</span>
     <span class="archive-card__cta">
       Czytaj artykuł
-      <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+      <app-icon name="arrow_forward" />
     </span>
   </span>
 </a>

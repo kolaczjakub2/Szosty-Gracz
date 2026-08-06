@@ -2,15 +2,62 @@
 <html lang="pl">
   <head>
     <meta charset="utf-8" />
-    <title>Szósty Gracz Modern</title>
+    <title>Szósty Gracz — NBA po polsku</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Nowoczesny frontend Szóstego Gracza oparty o Angular, Angular Material i WordPress REST API."
+      content="Najnowsze informacje, analizy, komentarze i podcasty o NBA po polsku."
     />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#080909" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content="Szósty Gracz" />
+    <style>
+      html:not([data-theme-ready='true']) body {
+        visibility: hidden;
+      }
+    </style>
+    <script>
+      (() => {
+        const storageKey = 'szostygracz-color-theme';
+        const root = document.documentElement;
+
+        try {
+          const savedTheme = localStorage.getItem(storageKey);
+          const theme =
+            savedTheme === 'light' || savedTheme === 'dark'
+              ? savedTheme
+              : matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark';
+
+          root.dataset.theme = theme;
+          root.style.colorScheme = theme;
+          root.dataset.themeReady = 'true';
+        } catch {
+          root.dataset.theme = 'dark';
+          root.style.colorScheme = 'dark';
+          root.dataset.themeReady = 'true';
+        }
+      })();
+    </script>
+    <noscript>
+      <style>
+        body {
+          visibility: visible;
+        }
+      </style>
+    </noscript>
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon-6g.png" />
+    <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preconnect" href="https://szostygracz.pl" crossorigin />
   </head>
   <body>
     <app-root></app-root>

@@ -68,13 +68,24 @@ export class Wordpress {
     [2, '/team-maciej-kwiatkowski.jpg'],
     [1980, '/team-adam-szczepanski-avatar.jpg'],
   ]);
+  private readonly buildVersion =
+    (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[
+      'DEPLOY_ID'
+    ] ??
+    (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[
+      'BUILD_ID'
+    ];
   private readonly fallbackImage =
     'https://szostygracz.pl/wp-content/uploads/2024/09/6g_2012-1.png';
 
   constructor(private readonly http: HttpClient) {}
 
   getLatestPosts(page = 1, perPage = 16): Observable<PaginatedArticles> {
-    const params = this.postsParams(page, perPage);
+    let params = this.postsParams(page, perPage);
+
+    if (this.buildVersion) {
+      params = params.set('_sg_v', this.buildVersion);
+    }
 
     return this.http
       .get<WpPost[]>('/api/latest-posts', { params, observe: 'response' })

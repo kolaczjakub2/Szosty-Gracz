@@ -44,31 +44,35 @@ export class ArticleFeed {
     if (cached) return cached;
 
     const stateKey = makeStateKey<HomeViewModel>(`home-feed:${cacheKey}`);
-    const transferred = this.transferState.get<HomeViewModel | null>(stateKey, null);
+    const transferred =
+      isPlatformBrowser(this.platformId) && feed.type === 'latest' && page === 1
+        ? null
+        : this.transferState.get<HomeViewModel | null>(stateKey, null);
     let request$: Observable<HomeViewModel>;
 
     if (transferred) {
       this.transferState.remove(stateKey);
 
       if (!isPlatformBrowser(this.platformId)) {
-       request$ = of(transferred);
+        request$ = of(transferred);
       } else {
-       const refreshed = timer(30_000).pipe(
-         switchMap(() => this.getPostsForFeed(feed, page)),
-         map((result) => composeHomeViewModel(result)),
-         catchError(() => EMPTY),
-       );
+        const refreshDelay = feed.type === 'latest' && page === 1 ? 0 : 30_000;
+        const refreshed = timer(refreshDelay).pipe(
+          switchMap(() => this.getPostsForFeed(feed, page)),
+          map((result) => composeHomeViewModel(result)),
+          catchError(() => EMPTY),
+        );
 
-       request$ = concat(of(transferred), refreshed);
+        request$ = concat(of(transferred), refreshed);
       }
     } else {
       request$ = this.getPostsForFeed(feed, page).pipe(
-       map((result) => composeHomeViewModel(result)),
-       tap((viewModel) => {
-         if (isPlatformServer(this.platformId)) this.transferState.set(stateKey, viewModel);
-       }),
-       startWith(createLoadingHomeViewModel(page)),
-       catchError(() => of(createErrorHomeViewModel(page))),
+        map((result) => composeHomeViewModel(result)),
+        tap((viewModel) => {
+          if (isPlatformServer(this.platformId)) this.transferState.set(stateKey, viewModel);
+        }),
+        startWith(createLoadingHomeViewModel(page)),
+        catchError(() => of(createErrorHomeViewModel(page))),
       );
     }
 

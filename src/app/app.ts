@@ -1,22 +1,31 @@
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  PLATFORM_ID,
+  afterNextRender,
   computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, switchMap } from 'rxjs';
 
 import { ArticleDetail } from './components/article-detail/article-detail';
+import { AccountDialog } from './components/account-dialog/account-dialog';
 import { HomeFeed } from './components/home-feed/home-feed';
+import { ScrollTop } from './components/scroll-top/scroll-top';
+import { SiteFooter } from './components/site-footer/site-footer';
 import { SiteHeader } from './components/site-header/site-header';
 import { LOGO_URL, NAV_ITEMS, TEAMS } from './data/site-data';
 import { NavItem, TeamFilter } from './models/ui';
-import { Article, ArticleTag, ArticleTerm } from './models/wordpress';
+import { Article, ArticleDetailViewModel, ArticleTag, ArticleTerm, HomeViewModel } from './models/wordpress';
 import { ArticleFeed } from './services/article-feed';
 import { FeedUrlState } from './services/feed-url-state';
+import { SeoService } from './services/seo';
 import {
   ArchiveRequest,
   SelectedFeed,
@@ -25,7 +34,6 @@ import {
   createLoadingHomeViewModel,
   getActiveNavItemKey,
   getFeedTitle,
-  getTickerLabel,
   isAllFeedSelected,
 } from './utils/feed-view-model';
 
@@ -37,12 +45,17 @@ interface FeedSelection {
 
 @Component({
   selector: 'app-root',
-  imports: [ArticleDetail, HomeFeed, SiteHeader],
+  imports: [AccountDialog, ArticleDetail, HomeFeed, RouterOutlet, ScrollTop, SiteFooter, SiteHeader],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   private readonly articleFeed = inject(ArticleFeed);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
   private readonly urlState = inject(FeedUrlState);
   private shouldScrollToArchive = false;
 
@@ -54,6 +67,26 @@ export class App {
   readonly selectedCategory = signal<ArticleTerm | null>(null);
   readonly selectedPostId = signal<number | null>(null);
   readonly archivePage = signal(1);
+  readonly accountOpen = signal(false);
+  readonly randomArchiveArticles = signal<readonly Article[]>([]);
+  readonly randomArchiveLoading = signal(false);
+  readonly aboutPageOpen = signal(false);
+  readonly authorPageOpen = signal(false);
+  readonly supportPageOpen = signal(false);
+  readonly matchAlertPageOpen = signal(false);
+  readonly accountPageOpen = signal(false);
+  readonly accountProfilePageOpen = signal(false);
+  readonly notFoundPageOpen = signal(false);
+  readonly standalonePageOpen = computed(
+    () =>
+      this.aboutPageOpen() ||
+      this.authorPageOpen() ||
+      this.supportPageOpen() ||
+      this.matchAlertPageOpen() ||
+      this.accountPageOpen() ||
+      this.accountProfilePageOpen() ||
+      this.notFoundPageOpen(),
+  );
 
   readonly selectedFeed = computed<SelectedFeed>(() => {
     const tag = this.selectedTag();
@@ -114,10 +147,6 @@ export class App {
 
   readonly archiveTitle = computed(() => `Archiwum: ${this.feedTitle()}`);
 
-  readonly tickerLabel = computed(() =>
-    getTickerLabel(this.selectedTag(), this.selectedCategory(), this.selectedTeam()),
-  );
-
   readonly articleDetailViewModel = toSignal(
     toObservable(this.selectedPostId).pipe(
       switchMap((postId) => this.articleFeed.getArticleDetailViewModel(postId)),
@@ -126,7 +155,17 @@ export class App {
   );
 
   constructor() {
-    this.applyInitialUrlState();
+    this.syncUrlState();
+    if (isPlatformBrowser(this.platformId)) {
+      afterNextRender(() => this.observeRandomArchive());
+    }
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.syncUrlState());
 
     effect(() => {
       const archiveVm = this.archiveViewModel();
@@ -142,24 +181,73 @@ export class App {
       this.shouldScrollToArchive = false;
       this.scrollToArchiveSection();
     });
+
+    effect(() =>
+      this.updatePageMetadata(
+        this.leadViewModel(),
+        this.articleDetailViewModel(),
+        this.aboutPageOpen(),
+        this.authorPageOpen(),
+        this.supportPageOpen(),
+        this.matchAlertPageOpen(),
+        this.accountPageOpen(),
+        this.accountProfilePageOpen(),
+        this.notFoundPageOpen(),
+      ),
+    );
+  }
+
+  loadRandomArchive(): void {
+    if (this.randomArchiveLoading()) return;
+    this.randomArchiveLoading.set(true);
+    this.articleFeed.getRandomArchivePosts(4).subscribe({
+      next: (articles) => this.randomArchiveArticles.set(articles),
+      error: () => {
+        this.randomArchiveArticles.set([]);
+        this.randomArchiveLoading.set(false);
+      },
+      complete: () => this.randomArchiveLoading.set(false),
+    });
+  }
+
+  private observeRandomArchive(): void {
+    const section = this.document.querySelector('.random-archive');
+    const view = this.document.defaultView;
+
+    if (!section || !view || !('IntersectionObserver' in view)) {
+      view?.setTimeout(() => this.loadRandomArchive(), 5000);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        this.loadRandomArchive();
+      },
+      { rootMargin: '500px 0px' },
+    );
+
+    observer.observe(section);
+    this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
   openArticle(article: Article): void {
     this.selectedPostId.set(article.id);
-    this.urlState.setPost(article.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.urlState.openArticle(article);
+    this.scrollToTop();
   }
 
   closeArticle(): void {
     this.selectedPostId.set(null);
-    this.urlState.setPost(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.urlState.closeArticle();
+    this.scrollToTop();
   }
 
   goHome(): void {
     this.shouldScrollToArchive = false;
     this.clearTeamFilter();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.scrollToTop();
   }
 
   changeArchivePage(page: number): void {
@@ -170,10 +258,8 @@ export class App {
       return;
     }
 
-    this.selectedPostId.set(null);
     this.shouldScrollToArchive = true;
     this.archivePage.set(nextPage);
-    this.urlState.setPost(null);
     this.urlState.setPage(nextPage);
   }
 
@@ -227,28 +313,40 @@ export class App {
     this.selectFeed();
   }
 
-  private applyInitialUrlState(): void {
-    const initialState = this.urlState.readInitialState(this.teams);
+  private syncUrlState(): void {
+    const state = this.urlState.readCurrentState(this.teams);
+    const path = this.router.url.split(/[?#]/, 1)[0].replace(/\/+$/, '') || '/';
 
-    if (initialState.team) {
-      this.selectedTeam.set(initialState.team);
-    }
-
-    if (initialState.tag) {
-      this.selectedTeam.set(null);
-      this.selectedCategory.set(null);
-      this.selectedTag.set(initialState.tag);
-    } else if (initialState.category) {
-      this.selectedTeam.set(null);
-      this.selectedTag.set(null);
-      this.selectedCategory.set(initialState.category);
-    }
-
-    if (initialState.postId) {
-      this.selectedPostId.set(initialState.postId);
-    }
-
-    this.archivePage.set(initialState.archivePage);
+    this.aboutPageOpen.set(path === '/o-nas');
+    this.authorPageOpen.set(path.startsWith('/autor/'));
+    this.supportPageOpen.set(path === '/wspieraj');
+    this.matchAlertPageOpen.set(path === '/alert-meczowy');
+    this.accountPageOpen.set(
+      path === '/moje-konto/login' ||
+      path === '/moje-konto/forgot-password' ||
+      path === '/moje-konto/reset-password',
+    );
+    this.accountProfilePageOpen.set(
+      path === '/moje-konto' || path.startsWith('/moje-konto/edit-account'),
+    );
+    this.notFoundPageOpen.set(
+      path === '/404' ||
+      (![
+        '/',
+        '/o-nas',
+        '/wspieraj',
+        '/alert-meczowy',
+        '/moje-konto',
+        '/moje-konto/login',
+        '/moje-konto/forgot-password',
+        '/moje-konto/reset-password',
+      ].includes(path) && !path.startsWith('/artykul/') && !path.startsWith('/autor/')),
+    );
+    this.selectedTeam.set(state.team);
+    this.selectedTag.set(state.tag);
+    this.selectedCategory.set(state.category);
+    this.selectedPostId.set(state.postId);
+    this.archivePage.set(state.archivePage);
   }
 
   private selectFeed(selection: FeedSelection = {}, scrollToTop = false): void {
@@ -260,7 +358,7 @@ export class App {
     this.urlState.replaceFeedSelection(selection);
 
     if (scrollToTop) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.scrollToTop();
     }
   }
 
@@ -269,19 +367,121 @@ export class App {
   }
 
   private scrollToArchiveSection(): void {
+    const view = this.document.defaultView;
+
+    if (!view) {
+      return;
+    }
+
     setTimeout(() => {
-      requestAnimationFrame(() => {
-        const archiveSection = document.getElementById('archive-section');
+      view.requestAnimationFrame(() => {
+        const archiveSection = this.document.getElementById('archive-section');
 
         if (!archiveSection) {
           return;
         }
 
-        const headerHeight = document.querySelector<HTMLElement>('.site-header')?.offsetHeight ?? 0;
-        const top = archiveSection.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+        const headerHeight =
+          this.document.querySelector<HTMLElement>('.site-header')?.offsetHeight ?? 0;
+        const top = archiveSection.getBoundingClientRect().top + view.scrollY - headerHeight - 16;
 
-        window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+        view.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
       });
     });
+  }
+
+  private scrollToTop(): void {
+    this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  private updatePageMetadata(
+    leadViewModel: HomeViewModel,
+    viewModel: ArticleDetailViewModel,
+    aboutPageOpen: boolean,
+    authorPageOpen: boolean,
+    supportPageOpen: boolean,
+    matchAlertPageOpen: boolean,
+    accountPageOpen: boolean,
+    accountProfilePageOpen: boolean,
+    notFoundPageOpen: boolean,
+  ): void {
+    const article = viewModel.article;
+
+    if (notFoundPageOpen) {
+      this.seo.setNotFound();
+      return;
+    }
+
+    if (aboutPageOpen) {
+      this.seo.setStaticPage(
+        'O nas | Szósty Gracz',
+        'Poznaj historię i redakcję Szóstego Gracza oraz nasze teksty, podcasty i materiały o NBA.',
+        '/o-nas',
+      );
+      return;
+    }
+
+    if (authorPageOpen) {
+      return;
+    }
+
+    if (supportPageOpen) {
+      this.seo.setStaticPage(
+        'Wspieraj 6G | Szósty Gracz',
+        'Wspieraj Szóstego Gracza i pomóż nam tworzyć niezależne teksty, podcasty i materiały o NBA.',
+        '/wspieraj',
+      );
+      return;
+    }
+
+    if (matchAlertPageOpen) {
+      this.seo.setStaticPage(
+        'Alert meczowy | Szósty Gracz',
+        'Bez spoilerów podpowiadamy, które mecze NBA minionej nocy warto obejrzeć z odtworzenia.',
+        '/alert-meczowy',
+      );
+      return;
+    }
+
+    if (accountPageOpen) {
+      const accountPath = this.router.url.split(/[?#]/, 1)[0];
+      const isForgotPassword = accountPath === '/moje-konto/forgot-password';
+      const isResetPassword = accountPath === '/moje-konto/reset-password';
+      const title = isResetPassword
+        ? 'Ustaw nowe hasło | Szósty Gracz'
+        : isForgotPassword
+          ? 'Odzyskaj hasło | Szósty Gracz'
+          : 'Logowanie | Szósty Gracz';
+      const description = isResetPassword
+        ? 'Ustaw nowe hasło do swojego konta w serwisie Szósty Gracz.'
+        : isForgotPassword
+          ? 'Odzyskaj dostęp do swojego konta w serwisie Szósty Gracz.'
+          : 'Zaloguj się lub utwórz konto w serwisie Szósty Gracz.';
+
+      this.seo.setStaticPage(
+        title,
+        description,
+        accountPath,
+        'noindex, follow',
+      );
+      return;
+    }
+
+    if (accountProfilePageOpen) {
+      this.seo.setStaticPage(
+        'Dane konta | Szósty Gracz',
+        'Sprawdź i zaktualizuj dane swojego konta w Szóstym Graczu.',
+        '/moje-konto',
+        'noindex, follow',
+      );
+      return;
+    }
+
+    if (!article) {
+      this.seo.setHome(leadViewModel.hero?.heroImageUrl || leadViewModel.hero?.imageUrl);
+      return;
+    }
+
+    this.seo.setArticle(article);
   }
 }

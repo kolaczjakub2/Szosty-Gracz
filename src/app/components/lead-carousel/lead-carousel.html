@@ -7,12 +7,33 @@
 >
   <a
     class="hero-story story-link"
-    [href]="article().link"
-    target="_blank"
-    rel="noreferrer"
+    [href]="articlePath(article())"
     (click)="$event.preventDefault(); articleOpened.emit(article())"
   >
-    <img class="hero-story__image" [src]="article().imageUrl" [alt]="article().imageAlt" />
+    <img
+      class="hero-story__backdrop"
+      [src]="optimizedImageUrl(article().heroImageUrl || article().imageUrl, 720, 52)"
+      [srcset]="optimizedImageSrcset(article().heroImageUrl || article().imageUrl, [360, 540, 720, 960])"
+      sizes="100vw"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      fetchpriority="low"
+      width="1096"
+      height="720"
+    />
+    <img
+      class="hero-story__image"
+      [src]="optimizedImageUrl(article().heroImageUrl || article().imageUrl, 720, 68)"
+      [srcset]="optimizedImageSrcset(article().heroImageUrl || article().imageUrl, [480, 640, 800, 960])"
+      sizes="(max-width: 760px) calc(100vw - 54px), (max-width: 1200px) 70vw, 720px"
+      [alt]="article().imageAlt"
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+      width="1096"
+      height="720"
+    />
     <span class="hero-story__scan" aria-hidden="true"></span>
     <span class="hero-story__court" aria-hidden="true"></span>
 
@@ -27,7 +48,7 @@
       <div class="hero-story__kicker">
         <span class="eyebrow">{{ article().category }}</span>
         <span class="hero-story__date">
-          <mat-icon aria-hidden="true">schedule</mat-icon>
+          <app-icon name="schedule" />
           {{ article().date | date: 'dd.MM.yyyy, HH:mm' }}
         </span>
       </div>
@@ -36,7 +57,7 @@
       <div class="hero-story__actions">
         <span class="hero-story__cta">
           Czytaj artykuł
-          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          <app-icon name="arrow_forward" />
         </span>
       </div>
     </div>
@@ -44,16 +65,15 @@
 
   <div class="hero-carousel__controls" aria-label="Sterowanie karuzelą">
     <button
-      matIconButton
       type="button"
       aria-label="Poprzedni artykuł"
       (click)="previousSelected.emit()"
     >
-      <mat-icon>chevron_left</mat-icon>
+      <app-icon name="chevron_left" />
     </button>
     <span>{{ currentLabel() }} / {{ totalLabel() }}</span>
-    <button matIconButton type="button" aria-label="Następny artykuł" (click)="nextSelected.emit()">
-      <mat-icon>chevron_right</mat-icon>
+    <button type="button" aria-label="Następny artykuł" (click)="nextSelected.emit()">
+      <app-icon name="chevron_right" />
     </button>
   </div>
 

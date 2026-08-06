@@ -44,10 +44,7 @@ export class ArticleFeed {
     if (cached) return cached;
 
     const stateKey = makeStateKey<HomeViewModel>(`home-feed:${cacheKey}`);
-    const transferred =
-      isPlatformBrowser(this.platformId) && feed.type === 'latest' && page === 1
-        ? null
-        : this.transferState.get<HomeViewModel | null>(stateKey, null);
+    const transferred = this.transferState.get<HomeViewModel | null>(stateKey, null);
     let request$: Observable<HomeViewModel>;
 
     if (transferred) {
@@ -56,8 +53,7 @@ export class ArticleFeed {
       if (!isPlatformBrowser(this.platformId)) {
         request$ = of(transferred);
       } else {
-        const refreshDelay = feed.type === 'latest' && page === 1 ? 0 : 30_000;
-        const refreshed = timer(refreshDelay).pipe(
+        const refreshed = timer(30_000).pipe(
           switchMap(() => this.getPostsForFeed(feed, page)),
           map((result) => composeHomeViewModel(result)),
           catchError(() => EMPTY),

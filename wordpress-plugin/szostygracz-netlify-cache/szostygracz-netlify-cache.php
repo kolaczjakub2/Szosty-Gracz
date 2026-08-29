@@ -9,7 +9,6 @@
 if (!defined('ABSPATH')) {
     exit;
 }
-
 const SGNC_WEBHOOK_URL_OPTION = 'sgnc_webhook_url';
 const SGNC_WEBHOOK_SECRET_OPTION = 'sgnc_webhook_secret';
 const SGNC_DEFAULT_WEBHOOK_URL = 'https://szostygracz-nba.netlify.app/api/cache-purge';
@@ -114,4 +113,3 @@ function sgnc_render_settings_page() {
     </div>
     <?php
 }
-

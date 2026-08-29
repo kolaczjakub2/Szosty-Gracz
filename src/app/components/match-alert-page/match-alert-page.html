@@ -1,0 +1,42 @@
+<main class="match-alert shell">
+  <nav class="match-alert__breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a><span aria-hidden="true">/</span><span>Alert meczowy</span>
+  </nav>
+
+  <header class="match-alert__header">
+    <div>
+      <p class="match-alert__eyebrow">League Pass bez spoilerów</p>
+      <h1>Alert meczowy</h1>
+      <p>Podpowiadamy, które mecze minionej nocy warto obejrzeć z odtworzenia — bez zdradzania wyników.</p>
+    </div>
+    <span class="match-alert__safe"><i></i> Bez spoilerów</span>
+  </header>
+
+  <section class="match-alert__legend" aria-labelledby="match-alert-legend-title">
+    <h2 id="match-alert-legend-title">Legenda</h2>
+    <div>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/10/diament.png" alt="" /> Koniecznie sprawdź</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/09/spoko.png" alt="" /> Warto obejrzeć</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/10/superman.png" alt="" /> Wyjątkowy występ</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/10/dollar.png" alt="" /> Strzelanina</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/10/alert.png" alt="" /> Niskopunktowiec</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2015/10/meeeeh.png" alt="" /> Bez szału</span>
+      <span><img src="https://szostygracz.pl/wp-content/uploads/2014/10/kupa.png" alt="" /> Strata czasu</span>
+    </div>
+  </section>
+
+  <section class="match-alert__ranking" aria-labelledby="match-alert-ranking-title">
+    <header>
+      <h2 id="match-alert-ranking-title">Ranking meczów</h2>
+      <span><i></i> Aktualizowany przez redakcję</span>
+    </header>
+
+    @if (viewModel().loading) {
+      <div class="match-alert__state">Pobieramy najnowszy ranking…</div>
+    } @else if (viewModel().error) {
+      <div class="match-alert__state match-alert__state--error">Nie udało się pobrać rankingu. Spróbuj odświeżyć stronę.</div>
+    } @else {
+      <div class="match-alert__content" [innerHTML]="viewModel().contentHtml"></div>
+    }
+  </section>
+</main>

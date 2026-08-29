@@ -1,0 +1,72 @@
+<main class="account-page shell">
+  <nav class="account-page__breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a><span aria-hidden="true">/</span><span>Moje konto</span>
+  </nav>
+
+  @if (auth.authenticated()) {
+    <header class="account-page__header">
+      <div><p>Twoje konto</p><h1>Cześć, {{ auth.user()?.name }}</h1><span>{{ auth.user()?.email }}</span></div>
+      <button type="button" (click)="auth.logout()">Wyloguj się</button>
+    </header>
+
+    <section class="account-dashboard">
+      <nav aria-label="Nawigacja konta">
+        <a class="active" href="#subskrypcja">Subskrypcja</a>
+        <a routerLink="/moje-konto/edit-account">Dane konta</a>
+        <a href="https://szostygracz.pl/moje-konto/orders/" target="_blank" rel="noreferrer">Zamówienia ↗</a>
+      </nav>
+
+      <div id="subskrypcja" class="subscription-panel">
+        <span class="subscription-panel__eyebrow">Twoje wsparcie 6G</span>
+        @if (auth.user()?.subscription; as subscription) {
+          <div class="subscription-panel__status"><i></i>{{ subscription.statusLabel }}</div>
+          <h2>Subskrypcja #{{ subscription.id }}</h2>
+          <dl>
+            <div><dt>Kwota</dt><dd>{{ subscription.total }} / {{ subscription.period }}</dd></div>
+            <div><dt>Następna płatność</dt><dd>{{ subscription.nextPayment ? (subscription.nextPayment | date: 'dd.MM.yyyy') : '—' }}</dd></div>
+            <div><dt>Metoda płatności</dt><dd>{{ subscription.paymentMethod || '—' }}</dd></div>
+          </dl>
+          <a href="https://szostygracz.pl/moje-konto/my-subscription/" target="_blank" rel="noreferrer">Zarządzaj subskrypcją na WordPressie <span>↗</span></a>
+        } @else {
+          <div class="subscription-panel__empty">
+            <h2>Brak aktywnej subskrypcji</h2>
+            <p>Konto działa poprawnie. Jeśli chcesz regularnie wspierać Szóstego Gracza, wybierz jeden z progów na Patronite.</p>
+            <a routerLink="/wspieraj">Zobacz możliwości wsparcia <span>→</span></a>
+          </div>
+        }
+      </div>
+    </section>
+  } @else {
+    <header class="account-page__header account-page__header--guest">
+      <div><p>Społeczność 6G</p><h1>Moje konto</h1><span>Zaloguj się albo dołącz do Szóstego Gracza.</span></div>
+    </header>
+
+    <div class="account-access">
+      <section class="account-card" aria-labelledby="login-title">
+        <span class="account-card__number">01</span>
+        <h2 id="login-title">Logowanie</h2>
+        <form (ngSubmit)="submitLogin()">
+          <label>Nazwa użytkownika lub adres e-mail<input name="login" autocomplete="username" required [(ngModel)]="login" /></label>
+          <label>Hasło<input name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" /></label>
+          <label class="account-check"><input name="remember" type="checkbox" [(ngModel)]="remember" /><span>Zapamiętaj mnie</span></label>
+          <button type="submit" [disabled]="loginBusy()">{{ loginBusy() ? 'Logowanie…' : 'Zaloguj się' }}</button>
+          <a routerLink="/moje-konto/forgot-password">Nie pamiętasz hasła?</a>
+          @if (loginError()) { <p class="account-message account-message--error" role="alert">{{ loginError() }}</p> }
+        </form>
+      </section>
+
+      <section class="account-card" aria-labelledby="register-title">
+        <span class="account-card__number">02</span>
+        <h2 id="register-title">Rejestracja</h2>
+        <form (ngSubmit)="submitRegistration()">
+          <label>Adres e-mail<input name="email" type="email" autocomplete="email" required [(ngModel)]="email" /></label>
+          <p>Wyślemy Ci bezpieczny odnośnik do ustawienia hasła. Nie musisz tworzyć go teraz.</p>
+          <p class="account-card__privacy">Twoje dane wykorzystamy wyłącznie do obsługi konta i nie udostępnimy ich osobom trzecim.</p>
+          <button type="submit" [disabled]="registerBusy()">{{ registerBusy() ? 'Tworzenie konta…' : 'Utwórz konto' }}</button>
+          @if (registerError()) { <p class="account-message account-message--error" role="alert">{{ registerError() }}</p> }
+          @if (registerSuccess()) { <p class="account-message account-message--success" role="status">{{ registerSuccess() }}</p> }
+        </form>
+      </section>
+    </div>
+  }
+</main>

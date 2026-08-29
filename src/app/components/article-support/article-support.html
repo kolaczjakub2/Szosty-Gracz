@@ -1,0 +1,30 @@
+<aside class="article-support" aria-labelledby="article-support-title">
+  <div class="article-support__copy">
+    <span class="article-support__eyebrow">Niezależne NBA po polsku</span>
+    <h2 id="article-support-title">Pomóż nam grać dalej</h2>
+    <p>Szósty Gracz istnieje dzięki czytelnikom takim jak Ty. Twoje wsparcie pozwala nam codziennie tworzyć nowe teksty, podcasty i materiały o NBA.</p>
+  </div>
+
+  <a class="article-support__patronite" href="https://patronite.pl/szostygracz" target="_blank" rel="noreferrer">
+    <span class="article-support__mark" aria-hidden="true">P</span>
+    <span><small>Regularne wsparcie</small><strong>Wspieraj na Patronite</strong></span>
+    <span class="article-support__arrow" aria-hidden="true">↗</span>
+  </a>
+
+  @if (pwa.canInstall()) {
+    <button class="article-support__app" type="button" (click)="pwa.requestInstall()">
+      <img src="/icons/icon-96x96.png" alt="" width="50" height="50" />
+      <span><small>Czytaj jak w aplikacji</small><strong>Zainstaluj Szóstego Gracza</strong></span>
+      <span class="article-support__arrow" aria-hidden="true">↓</span>
+    </button>
+  }
+
+  <div class="article-support__once">
+    <span>Jednorazowo:</span>
+    <div>
+      @for (item of amounts; track item.amount) {
+        <a [href]="item.url" target="_blank" rel="noreferrer" [attr.aria-label]="'Wesprzyj kwotą ' + item.amount">{{ item.amount }}</a>
+      }
+    </div>
+  </div>
+</aside>

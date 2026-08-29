@@ -1,19 +1,67 @@
-@use '@angular/material' as mat;
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 400;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 500 800;
+  src: url('/fonts/inter-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 600;
+  src: url('/fonts/barlow-condensed-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 700;
+  src: url('/fonts/barlow-condensed-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 800 900;
+  src: url('/fonts/barlow-condensed-800.woff2') format('woff2');
+}
+
+.ui-spinner {
+  display: inline-block;
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #ff6a00;
+  border-radius: 50%;
+  animation: ui-spin 0.75s linear infinite;
+}
+
+@keyframes ui-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-spinner { animation-duration: 1.5s; }
+}
 
 html {
   color-scheme: dark;
+}
 
-  @include mat.theme((
-    color: (
-      theme-type: dark,
-      primary: mat.$orange-palette,
-      tertiary: mat.$cyan-palette,
-    ),
-    typography: Inter,
-    density: 0,
-  ));
+html[data-theme='light'] {
+  color-scheme: light;
 }
 
 * {
@@ -28,8 +76,8 @@ body {
 
 body {
   overflow-x: hidden;
-  background: #080909;
-  color: #f7f0e8;
+  background: var(--sg-body-bg, #080909);
+  color: var(--sg-text, #f7f0e8);
   font-family: 'Inter', Arial, sans-serif;
   letter-spacing: 0;
 }

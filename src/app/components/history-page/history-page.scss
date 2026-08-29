@@ -1,0 +1,50 @@
+:host { display:block; }
+.history-page { padding-top:34px;padding-bottom:72px; }
+.history-page__hero { position:relative;display:flex;align-items:center;justify-content:space-between;min-height:168px;margin-bottom:22px;padding:34px clamp(28px,4vw,52px);overflow:hidden;border:1px solid rgba(255,106,0,.3);border-radius:14px;background:linear-gradient(105deg,rgba(255,106,0,.15),transparent 42%),repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 92px),#0b0c0c;color:#fff7ee;box-shadow:0 18px 50px rgba(0,0,0,.25); }
+.history-page__hero::after { position:absolute;right:8%;top:-86px;width:260px;height:260px;border:1px solid rgba(255,106,0,.18);border-radius:50%;content:''; }
+.history-page__hero > div { position:relative;z-index:1;max-width:780px; }
+.history-page__kicker,.history-section-heading span:first-child { color:#ff7b22;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:.8rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase; }
+.history-page__hero h1 { margin:10px 0 0;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:clamp(3.2rem,6vw,5.5rem);font-weight:900;letter-spacing:-.045em;line-height:.78;text-transform:uppercase; }
+.history-page__hero h1 em { color:#ff6a00;font-style:normal; }
+.history-page__mark { position:relative;z-index:1;padding:10px 13px;border:1px solid rgba(255,106,0,.32);border-radius:6px;color:rgba(255,255,255,.42);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:800;letter-spacing:.16em; }
+.history-page__state { display:grid;min-height:360px;place-content:center;place-items:center;gap:12px;color:#aaa198; }
+.history-page__state app-icon { color:#ff6a00;font-size:42px; }
+.history-random,.history-topic,.history-latest { margin-top:18px;padding:22px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:linear-gradient(145deg,rgba(24,24,23,.96),rgba(13,14,14,.9));box-shadow:0 20px 60px rgba(0,0,0,.22); }
+.history-random { padding:0;border-color:rgba(255,106,0,.32);background:#0a0a09; }
+.history-random .history-section-heading { margin:0;padding:22px 24px 18px; }
+.history-section-heading { display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px;padding-bottom:17px;border-bottom:1px solid rgba(255,255,255,.1); }
+.history-section-heading h2 { margin:4px 0 0;color:#fff7ee;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:850;line-height:.95; }
+.history-section-heading p { max-width:470px;margin:0;color:#aaa198;font-size:.82rem;line-height:1.5;text-align:right; }
+.history-random__grid { display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:14px;padding:0 14px 14px; }
+.history-random__grid app-history-card:first-child { grid-column:span 7;grid-row:1 / span 2; }
+.history-random__grid app-history-card:not(:first-child) { grid-column:span 5; }
+.history-topics-layout { display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;margin-top:18px;align-items:start; }
+.history-topic { margin-top:0; }
+.history-topic--nineties { grid-column:1 / -1; }
+.history-topic--collection { grid-column:span 6; }
+.history-topic__grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+.history-topic--nineties .history-topic__grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.history-topic--jordan .history-topic__grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.history-topic--fights .history-topic__grid { grid-template-columns:1fr; }
+.history-category-row { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:18px;align-items:start; }
+.history-category-row .history-topic--jordan { grid-column:span 2; }
+.history-category-row .history-topic--fights { grid-column:span 1; }
+.history-category-row .history-topic--jordan .history-topic__grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.history-category-row .history-topic--fights { padding:18px; }
+.history-category-row .history-topic--fights .history-section-heading h2 { font-size:clamp(1.65rem,2.4vw,2.25rem); }
+.history-topic--warriors { margin-top:18px; }
+.history-topic--warriors .history-topic__grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.history-topic--alternate { background:linear-gradient(135deg,rgba(255,255,255,.025),rgba(255,106,0,.035)); }
+.history-topic__number { color:rgba(255,255,255,.1)!important;font-family:'Barlow Condensed',sans-serif!important;font-size:3rem!important;font-weight:900!important;letter-spacing:-.04em!important;line-height:.75; }
+.history-bottom-layout { display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px;align-items:start; }
+.history-bottom-layout .history-latest,.history-bottom-layout .history-topic { margin-top:0; }
+.history-latest__grid { display:grid;grid-template-columns:1fr;gap:14px; }
+.history-section-heading button { display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid rgba(255,106,0,.38);border-radius:8px;background:rgba(255,106,0,.09);color:#ff7b22;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:850;text-transform:uppercase; }
+.history-section-heading button app-icon { width:18px;height:18px;font-size:18px; }
+@media(max-width:1080px){.history-random__grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto}.history-random__grid app-history-card:first-child{grid-column:span 2;grid-row:auto}.history-random__grid app-history-card:not(:first-child){grid-column:span 1}.history-topic--collection{grid-column:span 12}.history-topic--nineties .history-topic__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.history-category-row{grid-template-columns:repeat(3,minmax(0,1fr))}.history-category-row .history-topic--jordan{grid-column:span 2}.history-category-row .history-topic--fights{grid-column:span 1}.history-topic--warriors .history-topic__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.history-page__mark{display:none}}
+@media(max-width:760px){.history-page{padding-top:16px;padding-bottom:48px}.history-page__hero{min-height:140px;padding:28px 20px}.history-page__hero h1{font-size:clamp(2.75rem,14vw,3.7rem)}.history-topic,.history-latest{padding:14px}.history-random{padding:0}.history-section-heading{align-items:flex-start;flex-direction:column;gap:8px}.history-section-heading h2{font-size:clamp(1.65rem,9vw,2.2rem);overflow-wrap:anywhere}.history-section-heading p{text-align:left}.history-random__grid,.history-topics-layout,.history-category-row,.history-topic__grid,.history-topic--nineties .history-topic__grid,.history-category-row .history-topic--jordan .history-topic__grid,.history-topic--warriors .history-topic__grid,.history-latest__grid{grid-template-columns:1fr}.history-random__grid{grid-template-rows:auto}.history-random__grid app-history-card:first-child,.history-random__grid app-history-card:not(:first-child){grid-column:auto;grid-row:auto}.history-topic--nineties,.history-topic--collection,.history-category-row .history-topic--jordan,.history-category-row .history-topic--fights{grid-column:1/-1}.history-section-heading button{width:100%;justify-content:center}}
+:host-context(html[data-theme='light']) .history-page__hero { background:radial-gradient(circle at 18% 18%,rgba(255,106,0,.18),transparent 30rem),#fffaf4;color:#24150d; }
+:host-context(html[data-theme='light']) .history-page__hero p { color:#6d594d; }
+:host-context(html[data-theme='light']) .history-random,:host-context(html[data-theme='light']) .history-topic,:host-context(html[data-theme='light']) .history-latest { border-color:rgba(31,24,20,.1);background:rgba(255,250,244,.9); }
+:host-context(html[data-theme='light']) .history-section-heading { border-color:rgba(31,24,20,.1); }
+:host-context(html[data-theme='light']) .history-section-heading h2 { color:#24150d; }

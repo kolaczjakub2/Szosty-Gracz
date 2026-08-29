@@ -1,0 +1,22 @@
+$mobile-max: 760px;
+$compact-mobile-max: 380px;
+
+$surface: #151514;
+$surface-soft: rgba(255, 255, 255, 0.025);
+$line: rgba(255, 255, 255, 0.08);
+$orange: #ff6a00;
+$orange-light: #ff7b22;
+$ink: #f7f0e8;
+$muted: #aaa198;
+
+@mixin mobile {
+  @media (max-width: $mobile-max) {
+    @content;
+  }
+}
+
+@mixin compact-mobile {
+  @media (max-width: $compact-mobile-max) {
+    @content;
+  }
+}

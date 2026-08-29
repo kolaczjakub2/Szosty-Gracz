@@ -1,0 +1,26 @@
+@if (pwa.canInstall() && !pwa.floatingDismissed()) {
+  <aside class="install-bar" aria-label="Zainstaluj aplikację Szósty Gracz">
+    <img src="/icons/icon-96x96.png" alt="" width="48" height="48" />
+    <span><strong>Szósty Gracz pod ręką</strong><small>Czytaj bez paska przeglądarki</small></span>
+    <button class="install-bar__action" type="button" (click)="pwa.requestInstall()">Zainstaluj</button>
+    <button class="install-bar__close" type="button" aria-label="Zamknij" (click)="pwa.dismissFloating()">
+      <app-icon name="close" />
+    </button>
+  </aside>
+}
+
+@if (pwa.iosHelpOpen()) {
+  <div class="ios-help" role="presentation" (click)="pwa.closeIosHelp()">
+    <section role="dialog" aria-modal="true" aria-labelledby="ios-help-title" (click)="$event.stopPropagation()">
+      <button class="ios-help__close" type="button" aria-label="Zamknij" (click)="pwa.closeIosHelp()"><app-icon name="close" /></button>
+      <img src="/icons/icon-128x128.png" alt="" width="72" height="72" />
+      <span class="ios-help__eyebrow">Instalacja na iPhone</span>
+      <h2 id="ios-help-title">Dodaj Szóstego Gracza do ekranu początkowego</h2>
+      <ol>
+        <li><span><app-icon name="ios_share" /></span><p>Kliknij ikonę <strong>Udostępnij</strong> na pasku Safari.</p></li>
+        <li><span><app-icon name="add_box" /></span><p>Wybierz <strong>Do ekranu początkowego</strong> i potwierdź.</p></li>
+      </ol>
+      <button class="ios-help__done" type="button" (click)="pwa.closeIosHelp()">Rozumiem</button>
+    </section>
+  </div>
+}

@@ -3,41 +3,50 @@
 
 @if (leadVm.loading) {
   <section class="loading-state">
-    <mat-spinner diameter="44"></mat-spinner>
+    <span class="ui-spinner" role="status" aria-label="Ładowanie"></span>
   </section>
 } @else if (leadVm.error) {
   <section class="error-state">
-    <mat-icon>cloud_off</mat-icon>
+    <app-icon name="cloud_off" />
     <p>{{ leadVm.error }}</p>
   </section>
 } @else if (leadVm.hero; as hero) {
-  <app-lead-grid
-    [hero]="hero"
-    [sideArticles]="leadVm.sideArticles"
-    (articleOpened)="articleOpened.emit($event)"
-  />
+  @if (showFeatured()) {
+    <div class="mobile-feed-intro" aria-hidden="true">
+      <span>NBA po polsku</span>
+      <strong>Najważniejsze teraz</strong>
+    </div>
 
-  <app-news-ticker
-    [label]="tickerLabel()"
-    [articles]="leadVm.latest.slice(0, 3)"
-    (articleOpened)="articleOpened.emit($event)"
-  />
+    <app-lead-grid
+      [hero]="hero"
+      [sideArticles]="leadVm.sideArticles"
+      (articleOpened)="articleOpened.emit($event)"
+    />
+
+    <app-home-promos />
+  }
 
   <section id="archive-section" class="content-grid">
     <app-latest-panel
       [title]="archiveTitle()"
-      [articles]="archiveVm.posts"
+      [articles]="archiveArticles()"
       [page]="archiveVm.page"
       [total]="archiveVm.total"
       [totalPages]="archiveVm.totalPages"
       [pages]="archivePages()"
+      [showPromos]="!showFeatured()"
+      [showRandomArchive]="showRandomArchive()"
+      [randomArticles]="randomArchiveArticles()"
+      [randomLoading]="randomArchiveLoading()"
+      [randomError]="randomArchiveError()"
       (articleOpened)="articleOpened.emit($event)"
       (pageSelected)="pageSelected.emit($event)"
+      (randomRequested)="randomArchiveRequested.emit()"
     />
   </section>
 } @else {
   <section class="empty-state">
-    <mat-icon>filter_alt_off</mat-icon>
+    <app-icon name="filter_alt_off" />
     <p>Brak wpisów dla tego filtra.</p>
     <button matButton type="button" (click)="filterCleared.emit()">Wyczyść filtr</button>
   </section>

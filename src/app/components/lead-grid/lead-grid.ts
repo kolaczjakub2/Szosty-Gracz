@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  afterNextRender,
   computed,
   input,
   output,
@@ -9,6 +10,7 @@ import {
 } from '@angular/core';
 
 import { Article } from '../../models/wordpress';
+import { uniqueArticles } from '../../utils/article-collections';
 import { LeadCarousel } from '../lead-carousel/lead-carousel';
 import { StoryDeck } from '../story-deck/story-deck';
 
@@ -23,7 +25,9 @@ export class LeadGrid implements OnDestroy {
   readonly sideArticles = input.required<readonly Article[]>();
   readonly articleOpened = output<Article>();
   readonly activeIndex = signal(0);
-  readonly featureArticles = computed(() => [this.hero(), ...this.sideArticles()].slice(0, 4));
+  readonly featureArticles = computed(() =>
+    uniqueArticles([this.hero(), ...this.sideArticles()]).slice(0, 4),
+  );
   readonly normalizedIndex = computed(() => {
     const lastIndex = Math.max(this.featureArticles().length - 1, 0);
 
@@ -37,15 +41,28 @@ export class LeadGrid implements OnDestroy {
   );
   readonly currentSlideLabel = computed(() => this.slideLabel(this.normalizedIndex()));
   readonly totalSlideLabel = computed(() => this.slideLabel(this.featureArticles().length - 1));
-  private autoplayId = window.setInterval(() => this.nextSlide(false), 6500);
+  private autoplayId: number | undefined;
+  private initialAutoplayId: number | undefined;
 
-  ngOnDestroy(): void {
-    window.clearInterval(this.autoplayId);
+  constructor() {
+    afterNextRender(() => {
+      this.initialAutoplayId = window.setTimeout(() => {
+        this.initialAutoplayId = undefined;
+        this.nextSlide(false);
+        this.autoplayId = this.startAutoplay();
+      }, 12_000);
+    });
   }
 
-  selectSlide(index: number): void {
-    this.activeIndex.set(index);
-    this.restartAutoplay();
+  ngOnDestroy(): void {
+    if (this.initialAutoplayId !== undefined) window.clearTimeout(this.initialAutoplayId);
+    if (this.autoplayId !== undefined) window.clearInterval(this.autoplayId);
+  }
+
+  openStory(index: number): void {
+    const article = this.featureArticles()[index];
+
+    if (article) this.articleOpened.emit(article);
   }
 
   previousSlide(): void {
@@ -64,7 +81,8 @@ export class LeadGrid implements OnDestroy {
   }
 
   pauseAutoplay(): void {
-    window.clearInterval(this.autoplayId);
+    this.clearInitialAutoplay();
+    if (this.autoplayId !== undefined) window.clearInterval(this.autoplayId);
   }
 
   resumeAutoplay(): void {
@@ -76,7 +94,18 @@ export class LeadGrid implements OnDestroy {
   }
 
   private restartAutoplay(): void {
-    window.clearInterval(this.autoplayId);
-    this.autoplayId = window.setInterval(() => this.nextSlide(false), 6500);
+    this.clearInitialAutoplay();
+    if (this.autoplayId !== undefined) window.clearInterval(this.autoplayId);
+    this.autoplayId = this.startAutoplay();
+  }
+
+  private clearInitialAutoplay(): void {
+    if (this.initialAutoplayId === undefined) return;
+    window.clearTimeout(this.initialAutoplayId);
+    this.initialAutoplayId = undefined;
+  }
+
+  private startAutoplay(): number | undefined {
+    return window.setInterval(() => this.nextSlide(false), 8000);
   }
 }

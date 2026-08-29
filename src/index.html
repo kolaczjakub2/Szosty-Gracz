@@ -1,23 +1,43 @@
 <!doctype html>
 <html lang="pl">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Szósty Gracz — NBA po polsku</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Najnowsze informacje, analizy, komentarze i podcasty o NBA po polsku."
-    />
-    <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#080909" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta property="og:locale" content="pl_PL" />
-    <meta property="og:site_name" content="Szósty Gracz" />
+    <base href="/"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Najnowsze informacje, analizy, komentarze i podcasty o NBA po polsku."/>
+    <meta name="robots" content="index, follow"/>
+    <meta name="theme-color" content="#080909"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-title" content="Szósty Gracz"/>
+    <meta name="onesignal-app-id" content=""/>
+    <meta name="color-scheme" content="dark light"/>
+    <meta name="referrer" content="strict-origin-when-cross-origin"/>
+    <meta property="og:locale" content="pl_PL"/>
+    <meta property="og:site_name" content="Szósty Gracz"/>
     <style>
-      html:not([data-theme-ready='true']) body {
-        visibility: hidden;
+      html[data-theme='light'] body {
+        background: #f0ebe4;
+        color: #181b1f;
+      }
+
+      html[data-theme='light'] app-root {
+        background:
+          radial-gradient(circle at 8% 8%, rgba(255, 106, 0, 0.26), transparent 32rem),
+          radial-gradient(circle at 94% 54%, rgba(255, 157, 89, 0.16), transparent 38rem),
+          linear-gradient(135deg, #fff8ef 0%, #efe6dc 52%, #f8f0e7 100%) !important;
+        color: #181b1f;
+      }
+
+      @media (max-width: 760px) {
+        html[data-theme='light'] app-root {
+          background:
+            radial-gradient(circle at 5% 5%, rgba(255, 106, 0, 0.24), transparent 24rem),
+            radial-gradient(circle at 100% 68%, rgba(255, 157, 89, 0.14), transparent 28rem),
+            linear-gradient(145deg, #fff8ef 0%, #efe6dc 56%, #f8f0e7 100%) !important;
+        }
       }
     </style>
     <script>
@@ -36,6 +56,9 @@
 
           root.dataset.theme = theme;
           root.style.colorScheme = theme;
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', theme === 'light' ? '#f0ebe4' : '#080909');
           root.dataset.themeReady = 'true';
         } catch {
           root.dataset.theme = 'dark';
@@ -44,22 +67,16 @@
         }
       })();
     </script>
-    <noscript>
-      <style>
-        body {
-          visibility: visible;
-        }
-      </style>
-    </noscript>
-    <link rel="icon" type="image/png" sizes="256x256" href="favicon-6g.png" />
-    <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preconnect" href="https://szostygracz.pl" crossorigin />
-  </head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    <link rel="alternate icon" type="image/png" sizes="256x256" href="favicon-6g.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png"/>
+    <link rel="preload" href="/fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin=""/>
+    <link rel="preload" href="/fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin=""/>
+    <link rel="preconnect" href="https://szostygracz.pl" crossorigin=""/>
+    <link rel="manifest" href="manifest.webmanifest"/>
+</head>
   <body>
     <app-root></app-root>
-  </body>
+    <noscript>Please enable JavaScript to continue using this application.</noscript>
+</body>
 </html>

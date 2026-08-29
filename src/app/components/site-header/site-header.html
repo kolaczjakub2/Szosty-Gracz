@@ -1,30 +1,78 @@
-<header class="site-header">
+<header class="site-header" [class.site-header--sticky]="stickyMode()">
   <app-header-topbar />
 
   <div class="masthead shell">
-    <a
-      class="brand"
-      href="/"
-      aria-label="Szósty Gracz"
-      (click)="$event.preventDefault(); homeSelected.emit()"
-    >
+    <a class="brand" href="/" aria-label="Szósty Gracz" (click)="$event.preventDefault(); homeSelected.emit()">
       <img [src]="logoUrl()" alt="Szósty Gracz" />
     </a>
 
-    <app-header-nav
-      [navItems]="navItems()"
-      [activeNavItemKey]="activeNavItemKey()"
-      (navItemSelected)="navItemSelected.emit($event)"
-    />
+    <div class="mobile-header-actions">
+      <button type="button" aria-label="Szukaj artykułów" [attr.aria-expanded]="searchOpen()" (click)="toggleSearch()">
+        <app-icon [name]="searchOpen() ? 'close' : 'search'" />
+      </button>
+      <app-theme-toggle [compact]="true" />
+      <app-account-menu [compact]="true" />
+      @if (showTeamPanel() && !stickyMode()) {
+        <button type="button" aria-label="Wybierz drużynę" [attr.aria-expanded]="mobileTeamsOpen()" (click)="toggleMobileTeams()">
+          <app-icon name="sports_basketball" />
+        </button>
+      }
+      <button type="button" [attr.aria-label]="mobileMenuOpen() ? 'Zamknij menu' : 'Otwórz menu'" [attr.aria-expanded]="mobileMenuOpen()" (click)="toggleMobileMenu()">
+        <app-icon [name]="mobileMenuOpen() ? 'close' : 'menu'" />
+      </button>
+    </div>
+
+    <div class="desktop-nav">
+      <app-header-nav [navItems]="navItems()" [activeNavItemKey]="activeNavItemKey()" (navItemSelected)="navItemSelected.emit($event)" />
+      <button class="header-search-toggle" type="button" aria-label="Szukaj artykułów" [attr.aria-expanded]="searchOpen()" (click)="toggleSearch()">
+        <app-icon [name]="searchOpen() ? 'close' : 'search'" />
+      </button>
+    </div>
   </div>
 
-  <app-team-strip
-    [teams]="teams()"
-    [selectedTeam]="selectedTeam()"
-    [allFeedSelected]="allFeedSelected()"
-    (teamSelected)="teamSelected.emit($event)"
-    (filterCleared)="filterCleared.emit()"
-  />
+  <div class="header-search" [class.header-search--open]="searchOpen()">
+    <form class="header-search__inner shell" role="search" (submit)="$event.preventDefault(); submitSearch(searchInput.value)">
+      <app-icon name="search" />
+      <input #searchInput type="search" name="q" autocomplete="off" placeholder="Szukaj artykułów, zawodników, drużyn…" aria-label="Szukaj artykułów" />
+      <button type="submit">Szukaj</button>
+    </form>
+  </div>
+
+  <div class="mobile-nav" [class.mobile-nav--open]="mobileMenuOpen()">
+    <div class="mobile-nav__inner">
+      <div class="mobile-nav__quick-links">
+        <a class="mobile-nav__quick-link" routerLink="/wspieraj" (click)="closeMobileMenu()">
+          <app-icon name="favorite_border" />
+          Wspieraj 6G
+        </a>
+        <a class="mobile-nav__quick-link" routerLink="/alert-meczowy" (click)="closeMobileMenu()">
+          <app-icon name="notifications_none" />
+          Alert meczowy
+        </a>
+      </div>
+      <app-header-nav [navItems]="navItems()" [activeNavItemKey]="activeNavItemKey()" (navItemSelected)="selectNavItem($event)" />
+    </div>
+  </div>
+
+  @if (showTeamPanel()) {
+    <div
+      class="teams-panel"
+      [class.teams-panel--open]="mobileTeamsOpen()"
+      [class.teams-panel--hidden]="stickyMode()"
+      [attr.aria-hidden]="stickyMode()"
+      [attr.inert]="stickyMode() ? '' : null"
+    >
+      <div class="teams-panel__inner">
+        <app-team-strip
+          [teams]="teams()"
+          [selectedTeam]="selectedTeam()"
+          [allFeedSelected]="allFeedSelected()"
+          (teamSelected)="mobileTeamsOpen.set(false); teamSelected.emit($event)"
+          (filterCleared)="mobileTeamsOpen.set(false); filterCleared.emit()"
+        />
+      </div>
+    </div>
+  }
 
   <app-active-filter [team]="selectedTeam()" (filterCleared)="filterCleared.emit()" />
 </header>

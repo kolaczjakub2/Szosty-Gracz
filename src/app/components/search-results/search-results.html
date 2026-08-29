@@ -1,0 +1,30 @@
+@let vm = viewModel();
+<section class="search-results">
+  <header class="search-results__header">
+    <div>
+      <span class="search-results__eyebrow">Wyniki wyszukiwania</span>
+      <h1>„{{ query() }}”</h1>
+      @if (!vm.loading && !vm.error) {
+        <p>{{ vm.total }} {{ resultLabel(vm.total) }}</p>
+      }
+    </div>
+    <button type="button" (click)="searchCleared.emit()">
+      <app-icon name="close" /> Wyczyść
+    </button>
+  </header>
+
+  @if (vm.loading) {
+    <div class="search-results__state"><span class="ui-spinner" role="status" aria-label="Wyszukiwanie"></span></div>
+  } @else if (vm.error) {
+    <div class="search-results__state"><app-icon name="cloud_off" /><p>{{ vm.error }}</p></div>
+  } @else if (!vm.posts.length) {
+    <div class="search-results__state"><app-icon name="search_off" /><h2>Nic nie znaleźliśmy</h2><p>Spróbuj innej frazy albo krótszego zapytania.</p></div>
+  } @else {
+    <div class="archive-grid search-results__grid">
+      @for (article of vm.posts; track article.id) {
+        <app-archive-card [article]="article" (articleOpened)="articleOpened.emit($event)" />
+      }
+    </div>
+    <app-archive-pagination [page]="vm.page" [totalPages]="vm.totalPages" [pages]="pages()" (pageSelected)="pageSelected.emit($event)" />
+  }
+</section>

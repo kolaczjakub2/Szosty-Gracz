@@ -21,10 +21,17 @@ export class LeadCarousel {
   readonly currentLabel = input.required<string>();
   readonly totalLabel = input.required<string>();
   readonly progressPercent = input.required<number>();
+  readonly isLongTitle = () => this.article().title.length > 72;
+  readonly isVeryLongTitle = () => this.article().title.length > 105;
 
   readonly articleOpened = output<Article>();
   readonly previousSelected = output<void>();
   readonly nextSelected = output<void>();
   readonly autoplayPaused = output<void>();
   readonly autoplayResumed = output<void>();
+
+  readonly isLowResolutionHero = () => {
+    const width = this.article().heroImageWidth;
+    return typeof width === 'number' && width > 0 && width < 1200;
+  };
 }

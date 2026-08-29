@@ -1,0 +1,115 @@
+<main class="account-profile shell">
+  <nav class="account-profile__breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a><span aria-hidden="true">/</span><a routerLink="/moje-konto">Moje konto</a><span aria-hidden="true">/</span><span>Dane konta</span>
+  </nav>
+
+  @if (auth.authenticated()) {
+    <header class="account-profile__hero">
+      <div class="account-profile__hero-copy">
+        <span class="account-profile__kicker"><i></i> Strefa zawodnika</span>
+        <h1>Twój profil.<br /><em>Twoje zasady.</em></h1>
+        <p>Zadbaj o dane, po których rozpoznaje Cię społeczność Szóstego Gracza.</p>
+      </div>
+      <div class="account-profile__account-actions">
+        <div class="account-profile__status">
+          <span class="account-profile__status-dot"></span>
+          <div><small>Status konta</small><strong>{{ auth.user()?.subscription?.statusLabel || 'Aktywne' }}</strong></div>
+          <b>#{{ auth.user()?.id }}</b>
+        </div>
+        <button class="account-profile__logout" type="button" (click)="auth.logout()">
+          <span aria-hidden="true">↗</span> Wyloguj się
+        </button>
+      </div>
+    </header>
+
+    <form class="account-profile__editor" (ngSubmit)="submit()">
+      <aside class="account-profile__identity">
+        <section
+          class="account-profile__avatar-card"
+          aria-labelledby="account-profile-picture"
+          (dragover)="onAvatarDragOver($event)"
+          (dragleave)="onAvatarDragLeave($event)"
+          (drop)="onAvatarDrop($event)"
+          [class.account-profile__avatar-card--dragging]="avatarDragging()"
+        >
+          <span class="account-profile__step">01 / IDENTYFIKACJA</span>
+          <label class="account-profile__avatar-control">
+            <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+            <span class="account-profile__avatar-ring">
+              @if (avatarUrl()) {
+                <img class="account-profile__avatar" [src]="avatarUrl()" alt="Twój avatar" />
+              } @else {
+                <span class="account-profile__avatar-placeholder" aria-hidden="true">{{ displayName.charAt(0) || '6' }}</span>
+              }
+              <span class="account-profile__camera" aria-hidden="true">+</span>
+            </span>
+          </label>
+          <h2 id="account-profile-picture">{{ displayName || 'Twój profil' }}</h2>
+          <p>{{ email }}</p>
+          <button type="button" class="account-profile__picture-action" [disabled]="avatarBusy()" (click)="avatarInput.click()">
+            {{ avatarBusy() ? 'Wysyłanie…' : 'Zmień zdjęcie' }}
+          </button>
+          <small>JPG, PNG lub WEBP · maks. 5 MB</small>
+          @if (avatarError()) { <p class="account-message account-message--error" role="alert">{{ avatarError() }}</p> }
+          @if (avatarSuccess()) { <p class="account-message account-message--success" role="status">{{ avatarSuccess() }}</p> }
+        </section>
+
+      </aside>
+
+      <section class="account-profile__form-card" aria-labelledby="account-profile-fields">
+        <div class="account-profile__section-head">
+          <div><span class="account-profile__step">02 / DANE PODSTAWOWE</span><h2 id="account-profile-fields">Informacje o Tobie</h2></div>
+          <span class="account-profile__required"><i></i> pola wymagane</span>
+        </div>
+
+        <div class="account-profile__field-grid">
+          <label><span>Wyświetlana nazwa <b>*</b></span><input name="displayName" autocomplete="name" required [(ngModel)]="displayName" /><small>Tak zobaczą Cię inni czytelnicy</small></label>
+          <label><span>Adres e-mail <b>*</b></span><input name="email" type="email" autocomplete="email" required [(ngModel)]="email" /><small>Używamy go tylko do obsługi konta</small></label>
+        </div>
+
+        <section class="account-profile__password">
+          <div class="account-profile__section-head account-profile__section-head--security">
+            <div><span class="account-profile__step">03 / BEZPIECZEŃSTWO</span><h2>Zmiana hasła</h2></div>
+            <span class="account-profile__lock" aria-hidden="true">●</span>
+          </div>
+          <p class="account-profile__section-copy">Nie chcesz zmieniać hasła? Zostaw poniższe pola puste.</p>
+          <div class="account-profile__field-stack">
+            <label><span>Aktualne hasło</span><input name="currentPassword" type="password" autocomplete="current-password" placeholder="••••••••" [(ngModel)]="currentPassword" /></label>
+            <div class="account-profile__field-grid">
+              <label><span>Nowe hasło</span><input name="newPassword" type="password" autocomplete="new-password" placeholder="Minimum 8 znaków" [(ngModel)]="newPassword" /></label>
+              <label><span>Powtórz nowe hasło</span><input name="confirmPassword" type="password" autocomplete="new-password" placeholder="Powtórz hasło" [(ngModel)]="confirmPassword" /></label>
+            </div>
+          </div>
+        </section>
+
+        <div class="account-profile__actions">
+          <div>
+            @if (error()) { <p class="account-message account-message--error" role="alert">{{ error() }}</p> }
+            @if (success()) { <p class="account-message account-message--success" role="status">{{ success() }}</p> }
+          </div>
+          <button type="submit" [disabled]="busy()"><span>{{ busy() ? 'Zapisywanie…' : 'Zapisz zmiany' }}</span><app-icon name="arrow_forward" /></button>
+        </div>
+      </section>
+    </form>
+  } @else {
+    <section class="account-profile__guest">
+      <div class="account-profile__guest-mark" aria-hidden="true"><span>6</span><i>G</i></div>
+      <div class="account-profile__guest-copy">
+        <span class="account-profile__kicker"><i></i> Twoja strefa 6G</span>
+        <h1>Wejdź do<br /><em>gry.</em></h1>
+        <p>Zaloguj się, aby edytować profil, zmienić avatar i zadbać o bezpieczeństwo swojego konta.</p>
+        <div class="account-profile__guest-actions">
+          <a class="account-profile__primary" routerLink="/moje-konto/login"><span>Przejdź do logowania</span><app-icon name="arrow_forward" /></a>
+          <a class="account-profile__secondary" routerLink="/">Wróć na stronę główną</a>
+        </div>
+      </div>
+      <div class="account-profile__guest-benefits">
+        <span>Po zalogowaniu</span>
+        <ul>
+          <li><b>01</b><div><strong>Własny profil</strong><small>Nazwa, email i avatar w jednym miejscu</small></div></li>
+          <li><b>02</b><div><strong>Bezpieczne konto</strong><small>Szybka zmiana hasła bez opuszczania 6G</small></div></li>
+        </ul>
+      </div>
+    </section>
+  }
+</main>

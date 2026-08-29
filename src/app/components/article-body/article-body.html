@@ -1,35 +1,67 @@
-<article>
+<article class="article-story">
+  <div
+    class="article-detail__cover"
+    [class.article-detail__cover--low-resolution]="isLowResolutionHero()"
+  >
+    <figure class="article-detail__hero-image">
+      <img
+        class="article-detail__hero-backdrop"
+        [src]="optimizedImageUrl(article().imageUrl, 960, 52)"
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="async"
+      />
+      <img
+          class="article-detail__hero-main"
+          [src]="optimizedImageUrl(article().imageUrl, 700, 78)"
+          [srcset]="optimizedImageSrcset(article().imageUrl, [480, 700])"
+        sizes="(max-width: 760px) 100vw, (max-width: 1200px) calc(100vw - 64px), 1120px"
+        [alt]="article().imageAlt || article().title"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+          width="700"
+          height="467"
+      />
+    </figure>
+
   <header class="article-detail__header">
-    @if (article().primaryTerm; as primaryTerm) {
-      <button
-        type="button"
-        class="eyebrow eyebrow--button"
-        [attr.aria-label]="'Pokaż wpisy: ' + article().category"
-        (click)="termSelected.emit(primaryTerm)"
-      >
-        {{ article().category }}
-      </button>
-    } @else {
-      <span class="eyebrow">{{ article().category }}</span>
-    }
-    <h1>{{ article().title }}</h1>
-    <div class="article-detail__meta">
-      <span>Autor: {{ article().authorName }}</span>
-      <span>Data: {{ article().date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+    <div class="article-detail__header-inner">
+        <h1>{{ formattedTitle() }}</h1>
+
     </div>
   </header>
-  <div class="article-detail__content" [innerHTML]="article().contentHtml"></div>
+  </div>
 
-  <a
-    matButton
-    class="article-detail__source"
-    [href]="article().link"
-    target="_blank"
-    rel="noreferrer"
-  >
-    Otwórz oryginał
-    <mat-icon aria-hidden="true">north_east</mat-icon>
-  </a>
+  <div class="article-detail__reading-shell">
+    <aside class="article-detail__rail" aria-label="Informacje o artykule">
+      <div class="article-detail__byline">
+        <span class="article-detail__author-mark" aria-hidden="true">
+          @if (article().authorAvatarUrl) {
+            <img [src]="article().authorAvatarUrl" alt="" />
+          } @else {
+            {{ article().authorName.charAt(0) }}
+          }
+        </span>
+        <div><small>Autor</small><strong>{{ article().authorName }}</strong></div>
+        <span class="article-detail__meta-separator"></span>
+        <div><small>Opublikowano</small><strong>{{ article().date | date: 'dd.MM.yyyy, HH:mm' }}</strong></div>
+        <span class="article-detail__meta-separator"></span>
+        <div><small>Czas czytania</small><strong>{{ readingTime() }} min</strong></div>
+      </div>
+    </aside>
+    <div
+      class="article-detail__content"
+      lang="pl"
+      [innerHTML]="contentHtml()"
+      (click)="activateEmbeddedVideo($event)"
+    ></div>
+  </div>
 
-  <app-article-tags [tags]="article().tags" (tagSelected)="tagSelected.emit($event)" />
+  <app-article-support />
+
+  <footer class="article-detail__footer">
+    <app-article-tags [tags]="article().tags" (tagSelected)="tagSelected.emit($event)" />
+  </footer>
 </article>

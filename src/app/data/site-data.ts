@@ -1,20 +1,32 @@
 import { NavItem, TeamFilter } from '../models/ui';
 
-export const LOGO_URL = 'https://szostygracz.pl/wp-content/uploads/2024/09/6g_2012-1.png';
+export const LOGO_URL = '/szosty-gracz-logo-vector.svg';
 
 export const NAV_ITEMS: readonly NavItem[] = [
-  { label: 'WAKE-UP', id: 2491, name: 'wake-up', slug: 'wake-up', taxonomy: 'post_tag' },
-  { label: 'DNIÓWKA', id: 2141, name: 'Dniówka', slug: 'dniowka', taxonomy: 'category' },
-  { label: 'RZUTÓWKA', id: 5759, name: 'Rzutówka', slug: 'rzutowka', taxonomy: 'category' },
   {
-    label: 'PALMA',
-    id: 1437,
-    name: 'Między Rondem a Palmą',
-    slug: 'miedzy-rondem-a-palma-2',
+    label: 'MACIEJ',
+    id: 2,
+    name: 'Maciej Kwiatkowski',
+    slug: 'maciej-kwiatkowski',
     taxonomy: 'category',
+    path: '/autor/maciej-kwiatkowski',
   },
-  { label: 'FLESZ', id: 691, name: 'flesz', slug: 'flesz', taxonomy: 'post_tag' },
-  { label: 'NEWSY', id: 62, name: 'newsy', slug: 'newsy', taxonomy: 'category' },
+  {
+    label: 'ADAM',
+    id: 1,
+    name: 'Adam Szczepański',
+    slug: 'adam-szczepanski',
+    taxonomy: 'category',
+    path: '/autor/adam-szczepanski',
+  },
+  {
+    label: 'HISTORIA NBA',
+    id: 3506,
+    name: 'Historia NBA',
+    slug: 'historia-nba',
+    taxonomy: 'category',
+    path: '/historia-nba',
+  },
 ];
 
 export const TEAMS: readonly TeamFilter[] = [

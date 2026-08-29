@@ -1,0 +1,59 @@
+@if (auth.authenticated()) {
+  <details #menu class="account-menu" [class.account-menu--compact]="compact()">
+    <summary aria-label="Otwórz menu konta">
+      <span class="account-menu__avatar">
+        @if (auth.user()?.avatarUrl) {
+          <img [src]="auth.user()?.avatarUrl" alt="" />
+        } @else {
+          <span>{{ auth.user()?.name?.charAt(0) || '6' }}</span>
+        }
+      </span>
+      @if (!compact()) {
+        <span class="account-menu__trigger-copy">
+          <small>Zalogowany jako</small>
+          <strong>{{ auth.user()?.name }}</strong>
+        </span>
+        <app-icon name="expand_more" />
+      }
+    </summary>
+
+    <div class="account-menu__popover">
+      <div class="account-menu__user">
+        <span class="account-menu__avatar account-menu__avatar--large">
+          @if (auth.user()?.avatarUrl) {
+            <img [src]="auth.user()?.avatarUrl" alt="" />
+          } @else {
+            <span>{{ auth.user()?.name?.charAt(0) || '6' }}</span>
+          }
+        </span>
+        <div>
+          <strong>{{ auth.user()?.name }}</strong>
+          <small>{{ auth.user()?.email }}</small>
+        </div>
+      </div>
+
+      <div class="account-menu__status">
+        <span><i></i> Status konta</span>
+        <strong>{{ auth.user()?.subscription?.statusLabel || 'Aktywne' }}</strong>
+      </div>
+
+      <nav aria-label="Menu użytkownika">
+        <a routerLink="/moje-konto" (click)="menu.open = false">
+          <app-icon name="manage_accounts" />
+          <span><strong>Edytuj profil</strong><small>Dane, avatar i hasło</small></span>
+          <app-icon name="arrow_forward" />
+        </a>
+      </nav>
+
+      <button type="button" class="account-menu__logout" (click)="logout(menu)">
+        <app-icon name="logout" />
+        Wyloguj się
+      </button>
+    </div>
+  </details>
+} @else {
+  <a class="account-menu__guest" [class.account-menu__guest--compact]="compact()" routerLink="/moje-konto" aria-label="Moje konto">
+    <app-icon name="person_outline" />
+    @if (!compact()) { <span>Moje konto</span> }
+  </a>
+}

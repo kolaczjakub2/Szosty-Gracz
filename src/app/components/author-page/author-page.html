@@ -1,0 +1,51 @@
+<main class="author-page shell">
+  <nav class="author-page__breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a>
+    <span aria-hidden="true">/</span>
+    <a routerLink="/o-nas">O nas</a>
+    <span aria-hidden="true">/</span>
+    <span>{{ author()?.name ?? 'Autor' }}</span>
+  </nav>
+
+  @if (author(); as author) {
+    @let vm = viewModel();
+    @if (vm.loading) {
+      <section class="author-state" aria-label="Ładowanie wpisów autora">
+        <span class="ui-spinner" role="status" aria-label="Ładowanie"></span>
+        <p>Przeszukujemy archiwum…</p>
+      </section>
+    } @else if (vm.error) {
+      <section class="author-state author-state--error">
+        <app-icon name="cloud_off" />
+        <h2>Archiwum jest chwilowo niedostępne</h2>
+        <p>Nie udało się pobrać tekstów tego autora. Spróbuj ponownie za moment.</p>
+        <a routerLink="/o-nas">Wróć do redakcji</a>
+      </section>
+    } @else if (vm.posts.length) {
+      <app-latest-panel
+        [title]="author.name"
+        [articles]="vm.posts"
+        [page]="vm.page"
+        [total]="vm.total"
+        [totalPages]="vm.totalPages"
+        [pages]="pages()"
+        [showRandomArchive]="false"
+        (articleOpened)="openArticle($event)"
+        (pageSelected)="changePage($event)"
+      />
+    } @else {
+      <section class="author-state">
+        <app-icon name="inventory_2" />
+        <h2>Brak tekstów na tej stronie</h2>
+        <a routerLink="/o-nas">Wróć do redakcji</a>
+      </section>
+    }
+  } @else {
+    <section class="author-state author-state--missing">
+      <span>404</span>
+      <h1>Nie znaleźliśmy takiego autora</h1>
+      <p>Profil nie istnieje albo został przeniesiony.</p>
+      <a routerLink="/o-nas">Zobacz autorów z archiwum</a>
+    </section>
+  }
+</main>

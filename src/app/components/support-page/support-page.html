@@ -1,0 +1,56 @@
+<main class="support-page shell">
+  <nav class="support-breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a><span aria-hidden="true">/</span><span>Wspieraj 6G</span>
+  </nav>
+
+  <section class="support-hero">
+    <div class="support-hero__copy">
+      <p class="support-kicker"><span></span> Gramy dzięki Wam</p>
+      <h1>NBA dla wszystkich.<br /><em>Dzięki Tobie.</em></h1>
+      <p>Zburzyliśmy paywall i otworzyliśmy Szóstego Gracza dla wszystkich. Żeby codziennie pisać, nagrywać podcasty i tworzyć 6G TV, potrzebujemy jednak wsparcia ludzi, którzy chcą niezależnego głosu o NBA po polsku.</p>
+      <div class="support-hero__actions">
+        <a class="support-button support-button--primary" href="https://patronite.pl/szostygracz" target="_blank" rel="noreferrer">Wspieraj na Patronite <app-icon name="arrow_forward" /></a>
+        <a class="support-button" href="#jednorazowo">Wpłać jednorazowo <app-icon name="expand_more" /></a>
+      </div>
+    </div>
+    <aside class="support-hero__board" aria-label="Dlaczego warto nas wspierać">
+      <span class="support-hero__number">06</span>
+      <p class="support-hero__board-label">Szósty zawodnik</p>
+      <blockquote>„Najważniejsze się nie zmienia: istniejemy dzięki naszym czytelnikom i słuchaczom.”</blockquote>
+      <div class="support-ball" aria-hidden="true"></div>
+    </aside>
+  </section>
+
+  <section class="support-choice" aria-labelledby="support-choice-title">
+    <header><p class="support-kicker"><span></span> Najprostsza droga</p><h2 id="support-choice-title">Zostań z nami<br />na cały sezon.</h2></header>
+    <article class="patronite-card">
+      <div class="patronite-card__mark">P</div>
+      <div><span>Regularne wsparcie</span><h3>Patronite</h3><p>Wybierasz próg i wspierasz 6G co miesiąc. To przewidywalność, dzięki której możemy planować kolejne teksty, podcasty i materiały.</p></div>
+      <a href="https://patronite.pl/szostygracz" target="_blank" rel="noreferrer">Wybieram Patronite <app-icon name="arrow_forward" /></a>
+    </article>
+  </section>
+
+  <section id="jednorazowo" class="support-once" aria-labelledby="support-once-title">
+    <header><div><p class="support-kicker"><span></span> Bez zobowiązań</p><h2 id="support-once-title">Jedna wpłata.<br />Realna pomoc.</h2></div><p>Każda kwota przenosi bezpośrednio do bezpiecznej płatności Przelewy24.</p></header>
+    <div class="support-amounts">
+      @for (item of amounts; track item.amount) {
+        <a [class.support-amount--featured]="item.featured" class="support-amount" [href]="item.url" target="_blank" rel="noreferrer">
+          @if (item.featured) { <span class="support-amount__tag">Najczęstszy wybór</span> }
+          <strong>{{ item.amount }}</strong><span>{{ item.label }}</span><app-icon name="arrow_forward" />
+        </a>
+      }
+    </div>
+  </section>
+
+  <section class="support-benefits" aria-labelledby="support-benefits-title">
+    <div class="support-benefits__intro"><p class="support-kicker"><span></span> Dziękujemy po naszemu</p><h2 id="support-benefits-title">Jesteś częścią<br />naszej drużyny.</h2><p>Niezależnie od wybranej drogi, wspierający otrzymują dostęp do zamkniętej społeczności i dodatkowych materiałów.</p></div>
+    <ol>
+      <li><span>01</span><div><h3>Prywatna grupa 6G</h3><p>Miejsce dla wspierających, rozmów i tematów poza głównym feedem.</p></div></li>
+      <li><span>02</span><div><h3>Live’y tylko dla wspierających</h3><p>Dodatkowe spotkania na YouTube i bezpośredni kontakt z redakcją.</p></div></li>
+      <li><span>03</span><div><h3>Twoje nazwisko w 6G TV</h3><p>Od progu 30 zł pojawisz się na liście wspierających w naszych filmach.</p></div></li>
+      <li><span>04</span><div><h3>Wpływ na kolejne materiały</h3><p>Od 75 zł możesz zasugerować temat do 6G TV lub Palmy, a przy najwyższym progu także temat tekstu.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="support-final"><div><span>Razem od 2012 roku</span><h2>Dzięki, że gracie z nami.</h2></div><a href="https://patronite.pl/szostygracz" target="_blank" rel="noreferrer">Dołączam do drużyny <app-icon name="arrow_forward" /></a></section>
+</main>

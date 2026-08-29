@@ -51,7 +51,30 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss", "src/app/app.scss"]
+            "styles": [
+              "src/styles.scss",
+              "src/app/app.scss",
+              "src/app/styles/account-dialog.scss",
+              "src/app/styles/mobile-layout.scss",
+              "src/app/styles/mobile-header.scss",
+              "src/app/styles/mobile-feed.scss",
+              "src/app/styles/mobile-article.scss",
+              "src/app/styles/theme.scss"
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "security": {
+              "allowedHosts": [
+                "localhost",
+                "127.0.0.1",
+                "szostygracz.pl",
+                "www.szostygracz.pl",
+                "*.netlify.app"
+              ]
+            },
+            "ssr": {
+              "entry": "src/server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -67,7 +90,8 @@
                   "maximumError": "16kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

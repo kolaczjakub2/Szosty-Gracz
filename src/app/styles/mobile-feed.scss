@@ -115,17 +115,40 @@
 
   .hero-story__content {
     justify-content: flex-end;
-    padding: 294px 18px 18px;
+    padding: 294px 18px 82px;
 
     h1 {
+      display: flex;
+      align-items: flex-end;
+      flex: 0 0 clamp(5.7rem, 24vw, 5.9rem);
       width: 100%;
       max-width: 100%;
-      margin: 11px 0 13px;
+      height: clamp(5.7rem, 24vw, 5.9rem);
+      min-height: clamp(5.7rem, 24vw, 5.9rem);
+      margin: 8px 0 8px;
+      overflow: hidden;
       font-size: clamp(1.72rem, 7.6vw, 2.05rem);
       line-height: 1.07;
       letter-spacing: -0.018em;
       word-break: normal;
       text-wrap: balance;
+
+      span {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+      }
+    }
+
+    h1.hero-story__title--long {
+      font-size: clamp(1.42rem, 6.25vw, 1.68rem);
+      line-height: 1.04;
+    }
+
+    h1.hero-story__title--very-long {
+      font-size: clamp(1.27rem, 5.55vw, 1.5rem);
+      line-height: 1.03;
     }
 
     p {
@@ -143,10 +166,14 @@
   }
 
   .hero-story__actions {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
-    width: 100%;
+    width: auto;
   }
 
   .hero-story__cta {
@@ -272,9 +299,11 @@
     gap: 6px;
 
     strong {
+      display: block;
+      overflow: visible;
       font-size: 0.96rem;
       line-height: 1.2;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: unset;
     }
   }
 
@@ -442,12 +471,12 @@
 
   .archive-grid app-archive-card:nth-child(n) {
     display: block;
-    min-height: 156px;
+    min-height: 166px;
 
     .archive-card {
-      grid-template-columns: 116px minmax(0, 1fr);
+      grid-template-columns: 108px minmax(0, 1fr);
       grid-template-rows: 1fr;
-      min-height: 156px;
+      min-height: 166px;
     }
 
     .archive-card__media {
@@ -474,8 +503,11 @@
     .archive-card__body > strong {
       align-self: center;
       margin: 14px 0 10px;
-      font-size: 0.98rem;
-      line-height: 1.15;
+      font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+      font-size: 1rem;
+      font-weight: 750;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
       -webkit-line-clamp: unset;
     }
 

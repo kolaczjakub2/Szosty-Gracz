@@ -1,0 +1,57 @@
+<footer class="site-footer">
+  <div class="site-footer__main shell">
+    <section class="site-footer__about" aria-labelledby="footer-about-title">
+      <a
+        class="site-footer__brand"
+        href="/"
+        aria-label="Szósty Gracz — strona główna"
+        (click)="$event.preventDefault(); homeSelected.emit()"
+      >
+        <img [src]="optimizedImageUrl(logoUrl(), 280, 68)" alt="Szósty Gracz" width="280" height="90" />
+      </a>
+
+      <p class="site-footer__eyebrow">NBA po polsku od 2012 roku</p>
+      <h2 id="footer-about-title">Koszykówka bez depeszowego języka.</h2>
+      <p class="site-footer__description">
+        Codzienna porcja informacji, analiz, opinii i podcastów o najlepszej koszykarskiej
+        lidze świata — tworzona dla kibiców NBA w Polsce.
+      </p>
+
+      <a class="site-footer__contact" href="mailto:redakcja@szostygracz.pl">
+        <app-icon name="mail_outline" />
+        <span>redakcja&#64;szostygracz.pl</span>
+      </a>
+    </section>
+
+    <nav class="site-footer__nav" aria-label="Informacje o serwisie">
+      <p class="site-footer__heading">Szósty Gracz</p>
+      <a routerLink="/wspieraj">Wspieraj 6G</a>
+      <a routerLink="/moje-konto">Moje konto</a>
+      <a routerLink="/o-nas">O nas</a>
+      <button type="button" (click)="cookieSettingsSelected.emit()">Ustawienia cookies</button>
+    </nav>
+
+    <div class="site-footer__social" aria-label="Media społecznościowe">
+      <p class="site-footer__heading">Podążaj za nami</p>
+      <div>
+        <a href="https://www.facebook.com/szostygracz/" target="_blank" rel="noreferrer" aria-label="Szósty Gracz na Facebooku">
+          <span aria-hidden="true">f</span>
+          Facebook
+        </a>
+        <a href="https://twitter.com/SzostyGracz" target="_blank" rel="noreferrer" aria-label="Szósty Gracz na X">
+          <span aria-hidden="true">𝕏</span>
+          X
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="site-footer__bottom shell">
+    <span>© {{ currentYear }} Szostygracz.pl s.c.</span>
+    <a class="site-footer__credit" href="https://kolacz-dev.pl" target="_blank" rel="noreferrer" aria-label="Design and Development — Kolacz Dev">
+      <span><small>Design and Development</small><strong>kolacz-dev.pl</strong></span>
+      <img [src]="optimizedImageUrl('/kolacz-dev-logo.png', 140, 62)" alt="Kolacz — Jakub Kolacz" width="140" height="101" loading="lazy" decoding="async" />
+    </a>
+  </div>
+</footer>

@@ -1,10 +1,8 @@
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Injectable, PLATFORM_ID, TransferState, inject, makeStateKey } from '@angular/core';
 import {
-  EMPTY,
   Observable,
   catchError,
-  concat,
   forkJoin,
   map,
   of,
@@ -12,10 +10,15 @@ import {
   startWith,
   switchMap,
   tap,
-  timer,
 } from 'rxjs';
 
-import { Article, ArticleDetailViewModel, HomeViewModel, PaginatedArticles } from '../models/wordpress';
+import {
+  Article,
+  ArticleComment,
+  ArticleDetailViewModel,
+  HomeViewModel,
+  PaginatedArticles,
+} from '../models/wordpress';
 import {
   SelectedFeed,
   composeHomeViewModel,
@@ -37,9 +40,25 @@ export class ArticleFeed {
   private readonly homeViewModelCache = new Map<string, Observable<HomeViewModel>>();
   private readonly feedCache = new Map<string, Observable<PaginatedArticles>>();
 
+  getFeaturedHomeViewModel(): Observable<HomeViewModel> {
+    return this.getHomeViewModel(
+      {
+        type: 'category',
+        category: {
+          id: 3474,
+          name: 'Featured',
+          slug: 'featured',
+          taxonomy: 'category',
+        },
+      },
+      1,
+    );
+  }
+
   getHomeViewModel(feed: SelectedFeed, page: number): Observable<HomeViewModel> {
     const cacheKey = this.feedCacheKey(feed, page);
-    const cached = this.homeViewModelCache.get(cacheKey);
+    const isLatestLandingPage = feed.type === 'latest' && page === 1;
+    const cached = isLatestLandingPage ? null : this.homeViewModelCache.get(cacheKey);
 
     if (cached) return cached;
 
@@ -49,18 +68,17 @@ export class ArticleFeed {
 
     if (transferred) {
       this.transferState.remove(stateKey);
-
-      if (!isPlatformBrowser(this.platformId)) {
-        request$ = of(transferred);
-      } else {
-        const refreshed = timer(30_000).pipe(
-          switchMap(() => this.getPostsForFeed(feed, page)),
-          map((result) => composeHomeViewModel(result)),
-          catchError(() => EMPTY),
-        );
-
-        request$ = concat(of(transferred), refreshed);
-      }
+      request$ = of({
+        ...transferred,
+        posts: transferred.posts.map((article) => this.restoreTransferredArticle(article)),
+        hero: transferred.hero
+          ? this.restoreTransferredArticle(transferred.hero)
+          : undefined,
+        sideArticles: transferred.sideArticles.map((article) =>
+          this.restoreTransferredArticle(article),
+        ),
+        latest: transferred.latest.map((article) => this.restoreTransferredArticle(article)),
+      });
     } else {
       request$ = this.getPostsForFeed(feed, page).pipe(
         map((result) => composeHomeViewModel(result)),
@@ -73,7 +91,7 @@ export class ArticleFeed {
     }
 
     const shared = request$.pipe(shareReplay({ bufferSize: 1, refCount: false }));
-    this.homeViewModelCache.set(cacheKey, shared);
+    if (!isLatestLandingPage) this.homeViewModelCache.set(cacheKey, shared);
     return shared;
   }
 
@@ -86,16 +104,62 @@ export class ArticleFeed {
       return of(createEmptyArticleDetailViewModel());
     }
 
+    const stateKey = makeStateKey<ArticleDetailViewModel>(`article-detail:${postId}`);
+    const transferred = this.transferState.get<ArticleDetailViewModel | null>(stateKey, null);
+
+    if (transferred) {
+      this.transferState.remove(stateKey);
+      return of({
+        ...transferred,
+        article: transferred.article
+          ? this.restoreTransferredArticle(transferred.article)
+          : undefined,
+        comments: transferred.comments.map((comment) =>
+          this.restoreTransferredComment(comment),
+        ),
+        relatedArticles: (transferred.relatedArticles ?? []).map((article) =>
+          this.restoreTransferredArticle(article),
+        ),
+        authorArticles: (transferred.authorArticles ?? []).map((article) =>
+          this.restoreTransferredArticle(article),
+        ),
+      });
+    }
+
     return forkJoin({
       article: this.wordpress.getPostDetail(postId),
       comments: this.wordpress.getCommentsByPost(postId).pipe(catchError(() => of([]))),
     }).pipe(
-      map(({ article, comments }) => ({
-        loading: false,
-        article,
-        comments,
-        commentCount: comments.length,
-      })),
+      switchMap(({ article, comments }) =>
+        forkJoin({
+          relatedArticles: this.wordpress
+            .getRelatedPosts(article.tags, article.id, 3)
+            .pipe(catchError(() => of([]))),
+          authorCandidates: article.authorSlug
+            ? this.wordpress.getPostsByArchiveAuthor(article.authorSlug, 1).pipe(
+                map((result) => result.articles.filter((item) => item.id !== article.id)),
+                catchError(() => of([])),
+              )
+            : of([]),
+        }).pipe(
+          map(({ relatedArticles, authorCandidates }) => {
+            const relatedIds = new Set(relatedArticles.map((item) => item.id));
+            return {
+              loading: false,
+              article,
+              comments,
+              commentCount: comments.length,
+              relatedArticles,
+              authorArticles: authorCandidates
+                .filter((item) => !relatedIds.has(item.id))
+                .slice(0, 3),
+            };
+          }),
+        ),
+      ),
+      tap((viewModel) => {
+        if (isPlatformServer(this.platformId)) this.transferState.set(stateKey, viewModel);
+      }),
       startWith(createLoadingArticleDetailViewModel()),
       catchError(() => of(createErrorArticleDetailViewModel())),
     );
@@ -110,7 +174,9 @@ export class ArticleFeed {
 
     let request: Observable<PaginatedArticles>;
 
-    if (feed.type === 'tag') {
+    if (feed.type === 'search') {
+      request = this.wordpress.searchPosts(feed.query, page);
+    } else if (feed.type === 'tag') {
       request = this.wordpress.getPostsByTag(feed.tag, page);
     } else if (feed.type === 'category') {
       request = this.wordpress.getPostsByCategory(feed.category, page);
@@ -128,7 +194,9 @@ export class ArticleFeed {
   }
 
   private feedCacheKey(feed: SelectedFeed, page: number): string {
-    const selection = 'tag' in feed
+    const selection = 'query' in feed
+      ? feed.query.toLocaleLowerCase('pl-PL')
+      : 'tag' in feed
       ? feed.tag.id
       : 'category' in feed
         ? feed.category.id
@@ -137,5 +205,26 @@ export class ArticleFeed {
           : 'all';
 
     return `${feed.type}:${selection}:${page}`;
+  }
+
+  private restoreTransferredArticle<T extends Article>(article: T): T {
+    return {
+      ...article,
+      date: this.restoreWordpressLocalDate(article.date),
+    };
+  }
+
+  private restoreTransferredComment(comment: ArticleComment): ArticleComment {
+    return {
+      ...comment,
+      date: this.restoreWordpressLocalDate(comment.date),
+    };
+  }
+
+  private restoreWordpressLocalDate(value: Date): Date {
+    if (value instanceof Date) return value;
+
+    const serialized = String(value);
+    return new Date(serialized.endsWith('Z') ? serialized.slice(0, -1) : serialized);
   }
 }

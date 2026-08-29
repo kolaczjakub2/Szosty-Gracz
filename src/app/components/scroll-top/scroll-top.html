@@ -1,0 +1,12 @@
+<button
+  class="scroll-top"
+  type="button"
+  aria-label="Wróć na górę strony"
+  title="Wróć na górę"
+  [class.scroll-top--visible]="visible()"
+  [style.--scroll-progress]="progress() + '%'"
+  [attr.tabindex]="visible() ? 0 : -1"
+  (click)="scrollToTop()"
+>
+  <span aria-hidden="true">↑</span>
+</button>

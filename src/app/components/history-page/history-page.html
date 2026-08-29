@@ -1,0 +1,115 @@
+@let vm = viewModel();
+
+<main class="history-page shell">
+  <header class="history-page__hero">
+    <div>
+      <span class="history-page__kicker">Szósty Gracz przedstawia</span>
+      <h1>Historia <em>NBA</em></h1>
+    </div>
+    <span class="history-page__mark" aria-hidden="true">ARCHIWUM / 6G</span>
+  </header>
+
+  @if (vm.loading) {
+    <section class="history-page__state">
+      <span class="ui-spinner" role="status" aria-label="Ładowanie"></span>
+    </section>
+  } @else if (vm.error) {
+    <section class="history-page__state">
+      <app-icon name="cloud_off" />
+      <p>{{ vm.error }}</p>
+    </section>
+  } @else {
+    @if (vm.random.length) {
+      <section class="history-random" aria-labelledby="history-random-title">
+        <header class="history-section-heading">
+          <div><h2 id="history-random-title">LOSOWE Z HISTORII NBA</h2></div>
+        </header>
+        <div class="history-random__grid">
+          @for (article of vm.random; track article.id; let index = $index) {
+            <app-history-card [variant]="index === 0 ? 'lead' : 'side'" [article]="article" (articleOpened)="openArticle($event)" />
+          }
+        </div>
+      </section>
+    }
+
+    <div class="history-topics-layout">
+      @for (section of vm.sections; track section.term.id; let index = $index) {
+        @if ((index === 0 || index === 3 || index === 4) && section.articles.length) {
+          <section
+            class="history-topic"
+            [class.history-topic--nineties]="index === 0"
+            [class.history-topic--collection]="index === 3 || index === 4"
+          >
+            <header class="history-section-heading">
+              <div><h2>{{ section.title }}</h2></div>
+              <span class="history-topic__number" aria-hidden="true">{{ sectionNumber(index) }}</span>
+            </header>
+            <div class="history-topic__grid">
+              @for (article of section.articles; track article.id) {
+                <app-history-card
+                  variant="tile"
+                  [article]="article"
+                  (articleOpened)="openArticle($event)"
+                />
+              }
+            </div>
+          </section>
+        }
+      }
+    </div>
+
+    <div class="history-category-row">
+      @for (index of [1, 2]; track index) {
+        @if (vm.sections[index]; as section) {
+          @if (section.articles.length) {
+            <section
+              class="history-topic"
+              [class.history-topic--jordan]="index === 1"
+              [class.history-topic--fights]="index === 2"
+            >
+              <header class="history-section-heading">
+                <div><h2>{{ section.title }}</h2></div>
+                <span class="history-topic__number" aria-hidden="true">{{ sectionNumber(index) }}</span>
+              </header>
+              <div class="history-topic__grid">
+                @for (article of section.articles; track article.id) {
+                  <app-history-card variant="compact" [article]="article" (articleOpened)="openArticle($event)" />
+                }
+              </div>
+            </section>
+          }
+        }
+      }
+    </div>
+
+    @if (vm.sections[5]; as warriors) {
+      @if (warriors.articles.length) {
+        <section class="history-topic history-topic--warriors">
+          <header class="history-section-heading">
+            <div><h2>{{ warriors.title }}</h2></div>
+            <span class="history-topic__number" aria-hidden="true">06</span>
+          </header>
+          <div class="history-topic__grid">
+            @for (article of warriors.articles; track article.id) {
+              <app-history-card variant="tile" [article]="article" (articleOpened)="openArticle($event)" />
+            }
+          </div>
+        </section>
+      }
+    }
+
+    <div class="history-bottom-layout">
+      <section class="history-latest" aria-labelledby="history-latest-title">
+        <header class="history-section-heading">
+          <div><h2 id="history-latest-title">NAJNOWSZE Z KATEGORII HISTORIA</h2></div>
+          <button type="button" (click)="openHistoryArchive()">Zobacz wszystkie <app-icon name="arrow_forward" /></button>
+        </header>
+        <div class="history-latest__grid">
+          @for (article of vm.latest; track article.id) {
+            <app-history-card variant="wide" [article]="article" (articleOpened)="openArticle($event)" />
+          }
+        </div>
+      </section>
+    </div>
+  }
+</main>

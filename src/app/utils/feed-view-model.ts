@@ -8,6 +8,7 @@ import {
 import { TeamFilter } from '../models/ui';
 
 export type SelectedFeed =
+  | { type: 'search'; query: string }
   | { type: 'tag'; tag: ArticleTag }
   | { type: 'category'; category: ArticleTerm }
   | { type: 'team'; team: TeamFilter }
@@ -48,6 +49,8 @@ export function createEmptyArticleDetailViewModel(): ArticleDetailViewModel {
     loading: false,
     comments: [],
     commentCount: 0,
+    relatedArticles: [],
+    authorArticles: [],
   };
 }
 
@@ -56,6 +59,8 @@ export function createLoadingArticleDetailViewModel(): ArticleDetailViewModel {
     loading: true,
     comments: [],
     commentCount: 0,
+    relatedArticles: [],
+    authorArticles: [],
   };
 }
 
@@ -65,6 +70,8 @@ export function createErrorArticleDetailViewModel(): ArticleDetailViewModel {
     error: 'Nie uda\u0142o si\u0119 pobra\u0107 tego wpisu.',
     comments: [],
     commentCount: 0,
+    relatedArticles: [],
+    authorArticles: [],
   };
 }
 
@@ -106,14 +113,6 @@ export function getFeedTitle(
   team: TeamFilter | null,
 ): string {
   return tag?.name ?? category?.name ?? team?.name ?? 'Najnowsze';
-}
-
-export function getTickerLabel(
-  tag: ArticleTag | null,
-  category: ArticleTerm | null,
-  team: TeamFilter | null,
-): string {
-  return tag ? `#${tag.name}` : (category?.name.toUpperCase() ?? team?.code ?? 'NAJNOWSZE');
 }
 
 export function getActiveNavItemKey(

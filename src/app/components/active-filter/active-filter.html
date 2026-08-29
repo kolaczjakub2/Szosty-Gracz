@@ -1,12 +1,12 @@
 @if (team(); as selectedTeam) {
   <div class="active-filter shell" aria-live="polite">
     <span>
-      <mat-icon>filter_alt</mat-icon>
+      <app-icon name="filter_alt" />
       {{ selectedTeam.name }}
     </span>
     <button matButton type="button" (click)="filterCleared.emit()">
       Wyczyść
-      <mat-icon>close</mat-icon>
+      <app-icon name="close" />
     </button>
   </div>
 }

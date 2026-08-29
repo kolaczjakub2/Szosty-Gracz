@@ -1,0 +1,32 @@
+@use 'tokens' as *;
+
+@include mobile {
+  app-root {
+    background:
+      radial-gradient(circle at 82% 8%, rgba($orange, 0.12), transparent 18rem),
+      linear-gradient(180deg, #050606 0%, #0b0b0a 54%, #12100f 100%);
+  }
+
+  .shell {
+    width: calc(100% - 32px);
+  }
+
+  main.shell {
+    padding: 0 0 48px;
+  }
+
+  .lead-grid {
+    gap: 12px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@include compact-mobile {
+  .shell {
+    width: calc(100% - 24px);
+  }
+}

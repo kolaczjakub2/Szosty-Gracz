@@ -1,16 +1,16 @@
 <div class="topbar shell">
   <div class="topbar__links">
-    <a matButton href="https://szostygracz.pl/wspieraj/" target="_blank" rel="noreferrer">
-      <mat-icon>favorite_border</mat-icon>
+    <a class="topbar__item" matButton routerLink="/wspieraj">
+      <app-icon name="favorite_border" />
       WSPIERAJ 6G
     </a>
-    <a matButton href="https://szostygracz.pl/moje-konto/" target="_blank" rel="noreferrer">
-      <mat-icon>person_outline</mat-icon>
-      Moje konto
-    </a>
-    <a matButton href="https://szostygracz.pl/alert-meczowy/" target="_blank" rel="noreferrer">
-      <mat-icon>notifications_none</mat-icon>
+    <a class="topbar__item" matButton routerLink="/alert-meczowy">
+      <app-icon name="notifications_none" />
       Alert meczowy
     </a>
+  </div>
+  <div class="topbar__actions">
+    <app-account-menu />
+    <app-theme-toggle />
   </div>
 </div>

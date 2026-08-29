@@ -1,0 +1,253 @@
+@use 'tokens' as *;
+
+.mobile-header-actions,
+.mobile-nav {
+  display: none;
+}
+
+.desktop-nav {
+  display: contents;
+}
+
+.teams-panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows 180ms ease;
+}
+
+.teams-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 140ms ease;
+}
+
+.teams-panel--hidden {
+  grid-template-rows: 0fr;
+
+  .teams-panel__inner {
+    opacity: 0;
+  }
+}
+
+@include mobile {
+  .site-header {
+    background: rgba(8, 9, 9, 0.97);
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  .topbar,
+  .desktop-nav {
+    display: none;
+  }
+
+  .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 70px;
+    padding: 10px 0;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    height: 56px;
+    overflow: visible;
+
+    img {
+      width: min(174px, 100%);
+      height: 56px;
+      max-height: none;
+      object-fit: contain;
+      object-position: left center;
+    }
+  }
+
+  .mobile-header-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 0;
+
+    > button {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.045);
+      color: $ink;
+      cursor: pointer;
+      place-items: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    > button app-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+
+    app-account-menu .account-menu--compact .account-menu__avatar,
+    app-account-menu .account-menu__guest--compact app-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+
+    > button[aria-expanded='true'] {
+      border-color: rgba($orange, 0.65);
+      background: rgba($orange, 0.14);
+      color: #ff8a3d;
+    }
+  }
+
+  .mobile-nav,
+  .teams-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    border-top: 1px solid transparent;
+    transition: grid-template-rows 180ms ease, border-color 180ms ease;
+
+    > .mobile-nav__inner,
+    > .teams-panel__inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+  }
+
+  .mobile-nav--open,
+  .teams-panel--open:not(.teams-panel--hidden) {
+    grid-template-rows: 1fr;
+    border-top-color: $line;
+  }
+
+  .mobile-nav .category-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: calc(100% - 32px);
+    margin: 0 auto;
+    padding: 14px 0 18px;
+    overflow: visible;
+  }
+
+  .mobile-nav__quick-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: calc(100% - 32px);
+    margin: 0 auto;
+    padding: 14px 0 0;
+  }
+
+  .mobile-nav__quick-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.055);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+    color: #eee6dc;
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 0.96rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    app-icon {
+      width: 16px;
+      height: 16px;
+      color: #ff6a00;
+      font-size: 16px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: rgba($orange, 0.45);
+      background: rgba($orange, 0.12);
+      color: #ff8a3d;
+      text-decoration: none;
+    }
+  }
+
+  .mobile-nav .category-nav__item {
+    justify-content: flex-start;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.055);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+    font-size: 1.08rem;
+    letter-spacing: 0.025em;
+  }
+
+  .mobile-nav .category-nav__item--active {
+    border-color: rgba($orange, 0.45);
+    background: rgba($orange, 0.12);
+  }
+
+  .active-filter {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+}
+
+@include compact-mobile {
+  .brand {
+    width: 100%;
+    height: 36px;
+
+    img {
+      width: min(112px, 100%);
+      height: 36px;
+    }
+  }
+
+  .mobile-header-actions {
+    gap: 4px;
+
+    > button {
+      width: 36px;
+      height: 36px;
+    }
+
+    app-account-menu .account-menu--compact summary,
+    app-account-menu .account-menu__guest--compact {
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+    }
+
+    app-account-menu .account-menu--compact .account-menu__avatar,
+    app-account-menu .account-menu__guest--compact app-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teams-panel,
+  .teams-panel__inner {
+    transition: none;
+  }
+
+  @media (max-width: $mobile-max) {
+    .mobile-nav {
+      transition: none;
+    }
+  }
+}

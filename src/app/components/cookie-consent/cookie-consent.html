@@ -1,0 +1,31 @@
+@if (analytics.consent() === null || analytics.preferencesOpen()) {
+  <div class="cookie-backdrop" aria-hidden="true"></div>
+  <section class="cookie-consent" role="dialog" aria-modal="true" aria-labelledby="cookie-title" aria-describedby="cookie-description">
+    <div class="cookie-consent__mark" aria-hidden="true"><app-icon name="analytics" /></div>
+    <div class="cookie-consent__content">
+      <span class="cookie-consent__eyebrow">Twoja prywatność</span>
+      <h2 id="cookie-title">Czy możemy mierzyć ruch na stronie?</h2>
+      <p id="cookie-description">
+        Za Twoją zgodą użyjemy Google Analytics, aby zbiorczo sprawdzać, które treści są czytane.
+        Bez zgody Analytics nie zostanie załadowany ani nie wyśle danych do Google.
+      </p>
+
+      <button class="cookie-consent__details-toggle" type="button" [attr.aria-expanded]="detailsOpen()" (click)="detailsOpen.update(open => !open)">
+        {{ detailsOpen() ? 'Ukryj szczegóły' : 'Szczegóły i cookies' }}
+        <app-icon [name]="detailsOpen() ? 'expand_less' : 'expand_more'" />
+      </button>
+
+      @if (detailsOpen()) {
+        <div class="cookie-consent__details">
+          <p><strong>Niezbędne:</strong> zapamiętują ustawienia strony i Twoją decyzję. Nie wymagają zgody.</p>
+          <p><strong>Analityczne:</strong> Google Analytics 4 (Google Ireland Limited) mierzy odsłony i sposób korzystania z serwisu. Mogą powstać cookies <code>_ga</code>. Dane mogą być przetwarzane poza EOG.</p>
+          <p>Administratorem danych jest Szostygracz.pl s.c.; kontakt: <a href="mailto:redakcja@szostygracz.pl">redakcja&#64;szostygracz.pl</a>. Zgodę możesz wycofać w każdej chwili przez „Ustawienia cookies” w stopce. <a href="https://policies.google.com/privacy?hl=pl" target="_blank" rel="noreferrer">Polityka prywatności Google</a>.</p>
+        </div>
+      }
+    </div>
+    <div class="cookie-consent__actions">
+      <button class="cookie-consent__button cookie-consent__button--reject" type="button" (click)="analytics.reject()">Odrzucam</button>
+      <button class="cookie-consent__button cookie-consent__button--accept" type="button" (click)="analytics.accept()">Akceptuję analityczne</button>
+    </div>
+  </section>
+}

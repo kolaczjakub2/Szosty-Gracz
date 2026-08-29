@@ -1,31 +1,70 @@
-<section class="comments-panel" aria-label="Komentarze">
-  <div class="panel-heading">
-    <h2>Komentarze</h2>
-    <span>{{ commentCount() }}</span>
+<section id="comments" class="comments-panel" aria-label="Komentarze">
+  <div class="comments-panel__intro">
+    <div class="panel-heading">
+      <p>Dyskusja 6G</p>
+      <h2>Komentarze <span>{{ visibleComments().length }}</span></h2>
+    </div>
+    <p>Masz coś do dodania? Wskakuj do rozmowy.</p>
   </div>
 
-  @if (comments().length) {
+  @if (auth.authenticated()) {
+    @if (!replyTo()) {
+      <form class="comment-composer" (ngSubmit)="submit()">
+        <div class="comment-composer__identity">
+          <span class="comment-avatar">
+            @if (auth.user()?.avatarUrl) { <img [src]="auth.user()?.avatarUrl" alt="" /> }
+            @else { {{ auth.user()?.name?.charAt(0) || '6' }} }
+          </span>
+          <div><strong>{{ auth.user()?.name }}</strong><small>Dodaj komentarz do artykułu</small></div>
+        </div>
+        <label><span class="sr-only">Treść komentarza</span><textarea name="comment" maxlength="5000" rows="4" placeholder="Napisz, co myślisz…" required [(ngModel)]="content"></textarea></label>
+        <div class="comment-composer__actions"><small>{{ content.length }} / 5000</small><button type="submit" [disabled]="busy() || !content.trim()">{{ busy() ? 'Publikowanie…' : 'Opublikuj komentarz' }} <app-icon name="arrow_upward" /></button></div>
+      </form>
+    }
+  } @else {
+    <div class="comments-panel__login">
+      <app-icon name="forum" />
+      <div><strong>Dołącz do dyskusji</strong><span>Zaloguj się, aby komentować artykuły i odpowiadać innym.</span></div>
+      <a routerLink="/moje-konto/login" [queryParams]="{ returnUrl: loginReturnUrl() }">Zaloguj się <app-icon name="arrow_forward" /></a>
+    </div>
+  }
+
+  @if (error()) { <p class="comment-message comment-message--error" role="alert">{{ error() }}</p> }
+  @if (likeError()) { <p class="comment-message comment-message--error" role="alert">{{ likeError() }}</p> }
+  @if (success()) { <p class="comment-message comment-message--success" role="status">{{ success() }}</p> }
+
+  @if (visibleComments().length) {
     <div class="comment-list">
-      @for (comment of comments(); track comment.id) {
-        <article
-          class="comment-card"
-          [class.comment-card--reply]="comment.depth > 0"
-          [style.--comment-depth]="comment.depth"
-        >
-          <header>
-            <strong>
-              @if (comment.depth > 0) {
-                <mat-icon aria-hidden="true" fontIcon="subdirectory_arrow_right"></mat-icon>
+      @for (comment of visibleComments(); track comment.id) {
+        <article class="comment-card" [class.comment-card--reply]="comment.depth > 0" [style.--comment-depth]="comment.depth">
+          <div class="comment-card__avatar comment-avatar">
+            @if (comment.avatarUrl) { <img [src]="comment.avatarUrl" alt="" /> }
+            @else { {{ comment.authorName.charAt(0) || '?' }} }
+          </div>
+          <div class="comment-card__body">
+            <header><strong>{{ comment.authorName }}</strong><span>{{ comment.date | date: 'dd.MM.yyyy, HH:mm' }}</span></header>
+            <div class="comment-card__content" [innerHTML]="comment.contentHtml"></div>
+            <div class="comment-card__tools">
+              @if (auth.authenticated()) {
+                <button type="button" class="comment-card__like" [class.comment-card__like--active]="comment.liked" [disabled]="likeBusy() === comment.id" [attr.aria-label]="comment.liked ? 'Cofnij polubienie' : 'Polub komentarz'" [attr.aria-pressed]="comment.liked" (click)="toggleLike(comment)"><app-icon [name]="comment.liked ? 'thumb_up' : 'thumb_up_off_alt'" /><span>{{ comment.likeCount }}</span></button>
+                <button type="button" class="comment-card__reply" (click)="startReply(comment)"><app-icon name="reply" /> Odpowiedz</button>
+              } @else {
+                <span class="comment-card__like-count"><app-icon name="thumb_up_off_alt" />{{ comment.likeCount }}</span>
               }
-              {{ comment.authorName }}
-            </strong>
-            <span>{{ comment.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
-          </header>
-          <div [innerHTML]="comment.contentHtml"></div>
+            </div>
+          </div>
         </article>
+
+        @if (replyTo()?.id === comment.id) {
+          <form class="comment-composer comment-composer--reply" [style.--comment-depth]="comment.depth" (ngSubmit)="submit()">
+            <div class="comment-composer__replying"><span>Odpowiadasz użytkownikowi <strong>{{ comment.authorName }}</strong></span><button type="button" (click)="cancelReply()" aria-label="Anuluj odpowiedź">×</button></div>
+            <label><span class="sr-only">Treść odpowiedzi</span><textarea name="reply" maxlength="5000" rows="3" placeholder="Napisz odpowiedź…" required [(ngModel)]="content"></textarea></label>
+            <div class="comment-composer__actions"><small>{{ content.length }} / 5000</small><button type="submit" [disabled]="busy() || !content.trim()">{{ busy() ? 'Publikowanie…' : 'Opublikuj odpowiedź' }} <app-icon name="arrow_upward" /></button></div>
+          </form>
+        }
       }
     </div>
   } @else {
-    <p class="comments-panel__empty">Ten wpis nie ma jeszcze komentarzy.</p>
+    <p class="comments-panel__empty">Jeszcze nikt nie skomentował tego tekstu. Rozpocznij dyskusję.</p>
   }
 </section>

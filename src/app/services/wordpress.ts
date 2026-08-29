@@ -1,7 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { catchError, defer, forkJoin, map, of, switchMap, type Observable } from 'rxjs';
+import { catchError, defer, forkJoin, map, of, retry, switchMap, throwError, timer, type Observable } from 'rxjs';
 
 import {
   Article,
@@ -38,7 +38,6 @@ const EVERGREEN_ARCHIVE_CATEGORY_IDS = [
   3506, // historianba
   3505, // nineties
   878, // kultura
-  3509, // ksiazki
   3510, // kino
   3511, // analityka
   790, // Playbook
@@ -68,6 +67,12 @@ export class Wordpress {
     [2, '/team-maciej-kwiatkowski.jpg'],
     [1980, '/team-adam-szczepanski-avatar.jpg'],
   ]);
+  private readonly authorSlugsById = new Map<number, string>([
+    [1, 'adam'],
+    [2, 'maciej'],
+    [1020, 'sebastian-bielaswp-pl'],
+    [1980, 'adam'],
+  ]);
   private readonly buildVersion =
     (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[
       'DEPLOY_ID'
@@ -76,7 +81,7 @@ export class Wordpress {
       'BUILD_ID'
     ];
   private readonly fallbackImage =
-    'https://szostygracz.pl/wp-content/uploads/2024/09/6g_2012-1.png';
+    '/article-placeholder.png';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -101,6 +106,20 @@ export class Wordpress {
       );
   }
 
+  searchPosts(query: string, page = 1, perPage = 16): Observable<PaginatedArticles> {
+    const normalizedQuery = query.trim();
+
+    if (!normalizedQuery) {
+      return of(this.emptyPaginatedPosts(page));
+    }
+
+    const params = this.postsParams(page, perPage)
+      .set('search', normalizedQuery)
+      .set('orderby', 'relevance');
+
+    return this.getPaginatedPosts(params, page);
+  }
+
   getRandomArchivePosts(count = 4): Observable<Article[]> {
     return defer(() => {
       const before = new Date(Date.now() - 90 * DAY_IN_MILLISECONDS).toISOString();
@@ -114,7 +133,9 @@ export class Wordpress {
       return this.http.get<WpPost[]>(`${this.apiBase}/posts`, { params: countParams, observe: 'response' }).pipe(
         switchMap((response) => {
           const total = Number(response.headers.get('X-WP-Total') ?? 0);
-          if (!total) return of([]);
+          if (!total) {
+            return throwError(() => new Error('WordPress archive returned no total count.'));
+          }
 
           const sampleSize = Math.min(countSafe * 3, total);
           const pages = new Set<number>();
@@ -131,7 +152,9 @@ export class Wordpress {
               .set('_embed', 'wp:featuredmedia,wp:term')
               .set('_fields', POST_LIST_FIELDS);
             return this.http.get<WpPost[]>(`${this.apiBase}/posts`, { params }).pipe(
+              retry({ count: 1, delay: () => timer(300) }),
               map((posts) => posts[0] ? this.toArticle(posts[0]) : null),
+              catchError(() => of(null)),
             );
           })).pipe(
             map((articles) => articles
@@ -141,7 +164,50 @@ export class Wordpress {
           );
         }),
       );
-    });
+    }).pipe(
+      retry({ count: 2, delay: (_error, retryCount) => timer(retryCount * 500) }),
+    );
+  }
+
+  getRandomPostsByCategory(categoryId: number, count = 4): Observable<Article[]> {
+    return defer(() => {
+      const countSafe = Math.max(1, Math.min(Math.trunc(count), 6));
+      const countParams = new HttpParams()
+        .set('per_page', 1)
+        .set('categories', categoryId)
+        .set('_fields', 'id');
+
+      return this.http.get<WpPost[]>(`${this.apiBase}/posts`, { params: countParams, observe: 'response' }).pipe(
+        switchMap((response) => {
+          const total = Number(response.headers.get('X-WP-Total') ?? 0);
+          if (!total) return of([]);
+
+          const pages = new Set<number>();
+          while (pages.size < Math.min(countSafe, total)) {
+            pages.add(Math.floor(Math.random() * total) + 1);
+          }
+
+          return forkJoin([...pages].map((page) => {
+            const params = new HttpParams()
+              .set('per_page', 1)
+              .set('page', page)
+              .set('categories', categoryId)
+              .set('_embed', 'wp:featuredmedia,wp:term')
+              .set('_fields', POST_LIST_FIELDS);
+
+            return this.http.get<WpPost[]>(`${this.apiBase}/posts`, { params }).pipe(
+              retry({ count: 1, delay: () => timer(300) }),
+              map((posts) => posts[0] ? this.toArticle(posts[0]) : null),
+              catchError(() => of(null)),
+            );
+          })).pipe(
+            map((articles) => articles.filter((article): article is Article => Boolean(article))),
+          );
+        }),
+      );
+    }).pipe(
+      retry({ count: 2, delay: (_error, retryCount) => timer(retryCount * 500) }),
+    );
   }
 
   getPostsByTeamTag(teamName: string, page = 1, perPage = 16): Observable<PaginatedArticles> {
@@ -187,6 +253,24 @@ export class Wordpress {
         return this.getPaginatedPosts(params, page);
       }),
     );
+  }
+
+  getRelatedPosts(
+    tags: readonly ArticleTag[],
+    excludedPostId: number,
+    count = 3,
+  ): Observable<Article[]> {
+    const tagIds = [...new Set(tags.map((tag) => tag.id).filter(Boolean))];
+    if (!tagIds.length) return of([]);
+
+    const safeCount = Math.max(1, Math.min(Math.trunc(count), 6));
+    const params = this.postsParams(1, safeCount)
+      .set('tags', tagIds.join(','))
+      .set('exclude', excludedPostId)
+      .set('orderby', 'date')
+      .set('order', 'desc');
+
+    return this.getPaginatedPosts(params, 1).pipe(map((result) => result.articles));
   }
 
   getPostsByCategory(
@@ -436,11 +520,12 @@ export class Wordpress {
     root.innerHTML = html;
 
     const slugs = Array.from(
-      root.querySelectorAll<HTMLAnchorElement>('.td-ss-main-content .td_module_10 .entry-title a'),
+      root.querySelectorAll<HTMLAnchorElement>('.td_module_10 .entry-title a'),
     )
       .map((link) => link.getAttribute('href') ?? '')
       .map((href) => href.split(/[?#]/, 1)[0].split('/').filter(Boolean).at(-1) ?? '')
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter((slug, index, allSlugs) => allSlugs.indexOf(slug) === index);
     const postCountText = root.querySelector('.td-author-post-count')?.textContent ?? '';
     const pageCountText = root.querySelector('.page-nav .pages')?.textContent ?? '';
     const total = Number(postCountText.match(/\d+/)?.[0] ?? slugs.length);
@@ -486,6 +571,7 @@ export class Wordpress {
         media?.source_url ??
         recoveredImageUrl ??
         this.fallbackImage,
+      heroImageWidth: media?.media_details?.width,
       imageAlt: media?.alt_text || title,
       category: categoryName,
       primaryTerm: primaryTerm ? this.toArticleTerm(primaryTerm) : undefined,
@@ -503,6 +589,8 @@ export class Wordpress {
         media?.media_details?.sizes?.full?.source_url ??
         media?.source_url ??
         article.imageUrl,
+      authorId: post.author,
+      authorSlug: this.authorSlugsById.get(post.author) ?? '',
       authorName: this.pickAuthorName(post),
       authorAvatarUrl: this.authorAvatarsById.get(post.author),
       contentHtml: post.content?.rendered ?? '',

@@ -1,0 +1,187 @@
+<main class="about-page shell">
+  <nav class="about-page__breadcrumb" aria-label="Okruszki">
+    <a routerLink="/">Strona główna</a>
+    <span aria-hidden="true">/</span>
+    <span>O nas</span>
+  </nav>
+
+  <section class="about-hero">
+    <div class="about-hero__copy">
+      <p class="about-kicker"><span></span> O nas · od 2012 roku</p>
+      <h1>NBA ma wiele głosów.<br /><em>My mamy własny.</em></h1>
+      <p class="about-hero__lead">
+        Cześć! Tu Maciej Kwiatkowski i Adam Szczepański. Od ponad 20 lat zarywamy
+        noce, żeby opowiadać o najlepszej koszykarskiej lidze świata. W 2012 roku
+        połączyliśmy siły i stworzyliśmy Szóstego Gracza.
+      </p>
+      <div class="about-hero__actions">
+        <a class="about-button about-button--primary" href="mailto:redakcja@szostygracz.pl">Napisz do nas</a>
+        <a class="about-button" routerLink="/wspieraj">Wspieraj 6G <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+
+    <div class="about-hero__scoreboard" aria-label="Szósty Gracz działa od 2012 roku">
+      <span class="about-hero__label">SEZON</span>
+      <strong>2012</strong>
+      <span class="about-hero__dash">—</span>
+      <strong>∞</strong>
+      <div class="about-hero__ball" aria-hidden="true"></div>
+      <p>365 dni w roku z najlepszą ligą świata</p>
+    </div>
+  </section>
+
+  <section class="about-stats" aria-label="Szósty Gracz w liczbach">
+    <article>
+      <strong>2012</strong>
+      <span>rok pierwszego wpisu</span>
+    </article>
+    <article>
+      <strong>20+</strong>
+      <span>lat zarywanych nocy</span>
+    </article>
+    <article>
+      <strong>~2000</strong>
+      <span>długich tekstów w archiwum</span>
+    </article>
+  </section>
+
+  <section class="about-origin">
+    <div class="about-origin__copy">
+      <p class="about-kicker"><span></span> Nasz początek</p>
+      <h2>Dwa blogi.<br />Jedna redakcja.</h2>
+      <p>
+        SzóstyGracz.pl stworzyli autorzy blogów <strong>ZawszePoPierwsze</strong> i
+        <strong>Czwarta Kwarta</strong>. Zamiast tłumaczyć depesze, postawiliśmy na
+        analizy, opinie, komentarze i podcasty pisane językiem ludzi, którzy naprawdę
+        żyją koszykówką.
+      </p>
+      <p>
+        Oryginalne teksty, własne spojrzenie i rozmowa z czytelnikami — ten fundament
+        pozostaje niezmienny.
+      </p>
+    </div>
+
+    <figure class="about-origin__archive">
+      <div>
+        <img src="/about-szosty-gracz-2012.jpg" alt="Archiwalna grafika Szóstego Gracza z 2012 roku" />
+      </div>
+      <figcaption><span>Z archiwum</span> Pierwsza identyfikacja Szóstego Gracza, 2012</figcaption>
+    </figure>
+  </section>
+
+  <section class="about-mission">
+    <div class="about-mission__statement">
+      <p class="about-kicker"><span></span> Szósty Gracz dzisiaj</p>
+      <blockquote>Zburzyliśmy paywall.<br />Teraz gramy dla wszystkich.</blockquote>
+    </div>
+    <div class="about-mission__cards">
+      <article>
+        <span>01</span>
+        <h3>Wake-Up</h3>
+        <p>Codzienne, poranne relacje z najważniejszych meczów i wydarzeń. Wszystko w jednym miejscu.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Analizy bez gonienia za klikami</h3>
+        <p>Taktyka, wymiany, salary cap i zmiany w lidze — wybieramy to, co ważne, nie tylko głośne.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Między Rondem a Palmą</h3>
+        <p>Trzy razy w tygodniu rozmawiamy o NBA w podcaście, który od lat tworzy własną ligę.</p>
+      </article>
+      <article>
+        <span>04</span>
+        <h3>6G TV</h3>
+        <p>Na YouTube dokładamy obraz do głosu i rozmawiamy o NBA w naszym własnym stylu.</p>
+      </article>
+      <article>
+        <span>05</span>
+        <h3>Archiwum bez końca</h3>
+        <p>Blisko 2000 długich tekstów: historia NBA, gracze, filmy, książki, wyjazdy i niezwykłe wydarzenia.</p>
+      </article>
+      <article>
+        <span>06</span>
+        <h3>Newsy i Alert Meczowy</h3>
+        <p>Informacje publikowane na bieżąco oraz podpowiedzi, co obejrzeć — bez zdradzania wyniku.</p>
+      </article>
+    </div>
+    <p class="about-mission__community">
+      A pomiędzy tekstami jest jeszcze społeczność — ludzie z całej Polski, którzy od lat
+      spotykają się w komentarzach, wymieniają opiniami i wspólnie przeżywają każdy sezon.
+    </p>
+  </section>
+
+  <section class="about-team" aria-labelledby="about-team-title">
+    <header>
+      <div>
+        <p class="about-kicker"><span></span> Główni twórcy</p>
+        <h2 id="about-team-title">Maciej i Adam.<br />Od początku.</h2>
+      </div>
+      <p>Współtwórcy i główny motor napędowy Szóstego Gracza — od dwóch blogów do jednego wspólnego miejsca.</p>
+    </header>
+
+    <div class="about-team__founders">
+      @for (member of founders; track member.name) {
+        <article class="member-card member-card--founder">
+          @if (member.imageUrl) {
+            <img
+              class="member-card__photo"
+              [src]="member.imageUrl"
+              [alt]="member.name"
+              [style.object-position]="member.imagePosition ?? 'center'"
+              loading="lazy"
+            />
+          } @else {
+            <span class="member-card__initials">{{ member.initials }}</span>
+          }
+          <div>
+            <span>Główny twórca</span>
+            <h3>{{ member.name }}</h3>
+            <p>{{ member.role }}</p>
+          </div>
+          <a [href]="member.profileUrl" target="_blank" rel="noreferrer" [attr.aria-label]="member.name + ' na X'">↗</a>
+        </article>
+      }
+    </div>
+
+    <div class="about-team__archive">
+      <header class="about-team__archive-header">
+        <div>
+          <p class="about-kicker"><span></span> Z archiwum 6G</p>
+          <h3>Głosy zapisane w historii portalu.</h3>
+        </div>
+        <p>
+          Autorzy i komentatorzy, których teksty, analizy oraz podcasty pozostają częścią
+          rozbudowanego archiwum Szóstego Gracza.
+        </p>
+      </header>
+
+      <div class="about-team__contributors">
+        @for (member of archiveAuthors; track member.name) {
+          <a
+            class="member-card member-card--archive"
+            [routerLink]="['/autor', member.slug]"
+            [attr.aria-label]="'Zobacz teksty autora: ' + member.name"
+          >
+            <span class="member-card__initials">{{ member.initials }}</span>
+            <div>
+              <span>Archiwum 6G</span>
+              <h3>{{ member.name }}</h3>
+              <p>{{ member.role }}</p>
+            </div>
+            <span class="member-card__arrow" aria-hidden="true">→</span>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="about-cta">
+    <div>
+      <span>Masz pytanie, temat albo pomysł?</span>
+      <h2>Porozmawiajmy o koszykówce.</h2>
+    </div>
+    <a href="mailto:redakcja@szostygracz.pl">redakcja&#64;szostygracz.pl <span aria-hidden="true">→</span></a>
+  </section>
+</main>

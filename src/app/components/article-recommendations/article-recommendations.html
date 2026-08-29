@@ -1,0 +1,78 @@
+@if (relatedArticles().length || authorArticles().length) {
+  <aside class="article-recommendations" aria-label="Polecane artykuły">
+    @if (relatedArticles().length) {
+      <section class="article-recommendations__related">
+        <header class="article-recommendations__heading">
+          <div>
+            <span>Na podobny temat</span>
+            <h2>Powiązane teksty</h2>
+          </div>
+          <app-icon name="link" />
+        </header>
+
+        <div class="article-recommendations__grid">
+          @for (item of relatedArticles(); track item.id) {
+            <a
+              class="recommendation-card"
+              [href]="articlePath(item)"
+              (click)="$event.preventDefault(); articleOpened.emit(item)"
+            >
+              <span class="recommendation-card__media">
+                <img
+                  class="recommendation-card__backdrop"
+                  [src]="optimizedImageUrl(item.thumbnailUrl || item.imageUrl, 320, 42)"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <img
+                  class="recommendation-card__image"
+                  [src]="optimizedImageUrl(item.thumbnailUrl || item.imageUrl, 420, 74)"
+                  [alt]="item.imageAlt || item.title"
+                  loading="lazy"
+                  decoding="async"
+                  width="420"
+                  height="260"
+                />
+              </span>
+              <span class="recommendation-card__body">
+                <small>{{ item.date | date: 'dd.MM.yyyy' }}</small>
+                <strong>{{ item.title }}</strong>
+                <span>Czytaj <app-icon name="arrow_forward" /></span>
+              </span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+
+    @if (authorArticles().length) {
+      <section class="article-recommendations__author">
+        <header class="article-recommendations__heading">
+          <div>
+            <span>Więcej od autora</span>
+            <h2>{{ authorName() }}</h2>
+          </div>
+        </header>
+
+        <div class="author-recommendations">
+          @for (item of authorArticles(); track item.id; let index = $index) {
+            <a
+              class="author-recommendation"
+              [href]="articlePath(item)"
+              (click)="$event.preventDefault(); articleOpened.emit(item)"
+            >
+              <span class="author-recommendation__number" aria-hidden="true">0{{ index + 1 }}</span>
+              <span>
+                <small>{{ item.date | date: 'dd.MM.yyyy' }}</small>
+                <strong>{{ item.title }}</strong>
+              </span>
+              <app-icon name="arrow_forward" />
+            </a>
+          }
+        </div>
+      </section>
+    }
+  </aside>
+}

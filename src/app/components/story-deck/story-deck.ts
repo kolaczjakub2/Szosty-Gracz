@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { Article } from '../../models/wordpress';
+import { optimizedImageUrl } from '../../utils/image-url';
 
 @Component({
   selector: 'app-story-deck',
@@ -11,6 +12,7 @@ import { Article } from '../../models/wordpress';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StoryDeck {
+  readonly optimizedImageUrl = optimizedImageUrl;
   readonly articles = input.required<readonly Article[]>();
   readonly activeIndex = input.required<number>();
   readonly slideSelected = output<number>();

@@ -6,31 +6,72 @@
     [selectedTeam]="selectedTeam()"
     [activeNavItemKey]="activeNavItemKey()"
     [allFeedSelected]="allFeedSelected()"
+    [showTeamPanel]="!standalonePageOpen() && !searchQuery()"
     (homeSelected)="goHome()"
     (navItemSelected)="selectNavItem($event)"
     (teamSelected)="selectTeam($event)"
     (filterCleared)="clearTeamFilter()"
+    (accountSelected)="accountOpen.set(true)"
+    (searchSubmitted)="search($event)"
   />
 
-  <main class="shell">
-    @if (selectedPostId()) {
-      <app-article-detail
-        [viewModel]="articleDetailViewModel()"
-        (closed)="closeArticle()"
-        (tagSelected)="selectTag($event)"
-        (termSelected)="selectTerm($event)"
-      />
-    } @else {
-      <app-home-feed
-        [leadViewModel]="leadViewModel()"
-        [archiveViewModel]="archiveViewModel()"
-        [tickerLabel]="tickerLabel()"
-        [archiveTitle]="archiveTitle()"
-        [archivePages]="archivePages()"
-        (articleOpened)="openArticle($event)"
-        (pageSelected)="changeArchivePage($event)"
-        (filterCleared)="clearTeamFilter()"
-      />
+  @if (accountOpen()) {
+    @defer {
+      <app-account-dialog (closed)="accountOpen.set(false)" />
     }
-  </main>
+  }
+
+  <router-outlet />
+
+  @if (!standalonePageOpen()) {
+    <main class="shell">
+      @if (selectedPostId()) {
+        <app-article-detail
+          [viewModel]="articleDetailViewModel()"
+          (closed)="closeArticle()"
+          (tagSelected)="selectTag($event)"
+          (termSelected)="selectTerm($event)"
+          (articleOpened)="openArticle($event)"
+        />
+      } @else if (searchQuery()) {
+        <app-search-results
+          [query]="searchQuery()"
+          [viewModel]="archiveViewModel()"
+          [pages]="archivePages()"
+          (articleOpened)="openArticle($event)"
+          (pageSelected)="changeArchivePage($event)"
+          (searchCleared)="clearSearch()"
+        />
+      } @else {
+        <app-home-feed
+          [leadViewModel]="leadViewModel()"
+          [archiveViewModel]="archiveViewModel()"
+          [archiveTitle]="archiveTitle()"
+          [archivePages]="archivePages()"
+          [showFeatured]="allFeedSelected()"
+          [showRandomArchive]="allFeedSelected() && archivePage() === 1"
+          [randomArchiveArticles]="allFeedSelected() && archivePage() === 1 ? randomArchiveArticles() : []"
+          [randomArchiveLoading]="randomArchiveLoading()"
+          [randomArchiveError]="randomArchiveError()"
+          (articleOpened)="openArticle($event)"
+          (pageSelected)="changeArchivePage($event)"
+          (randomArchiveRequested)="loadRandomArchive()"
+          (filterCleared)="clearTeamFilter()"
+        />
+      }
+    </main>
+  }
+
+  <app-site-footer
+    [logoUrl]="logoUrl"
+    (homeSelected)="goHome()"
+    (accountSelected)="accountOpen.set(true)"
+    (cookieSettingsSelected)="analytics.openPreferences()"
+  />
+
+  <app-cookie-consent />
+
+  <app-pwa-install-prompt />
+
+  <app-scroll-top />
 </div>

@@ -1,4 +1,4 @@
-<mat-card class="panel archive-panel latest-panel">
+<section class="panel archive-panel latest-panel">
   <div class="archive-heading">
     <div>
       <span>Archiwum wpisów</span>
@@ -8,7 +8,25 @@
   </div>
 
   <div class="archive-grid">
-    @for (article of articles(); track article.id) {
+    @for (article of articlesBeforeRandom(); track article.id) {
+      <app-archive-card [article]="article" (articleOpened)="articleOpened.emit($event)" />
+    }
+
+    @if (showPromos()) {
+      <app-home-promos />
+    }
+
+    @if (showRandomArchive()) {
+      <app-random-archive-section
+        [articles]="randomArticles()"
+        [loading]="randomLoading()"
+        [error]="randomError()"
+        (articleOpened)="articleOpened.emit($event)"
+        (randomRequested)="randomRequested.emit()"
+      />
+    }
+
+    @for (article of articlesAfterRandom(); track article.id) {
       <app-archive-card [article]="article" (articleOpened)="articleOpened.emit($event)" />
     }
   </div>
@@ -19,4 +37,4 @@
     [pages]="pages()"
     (pageSelected)="pageSelected.emit($event)"
   />
-</mat-card>
+</section>

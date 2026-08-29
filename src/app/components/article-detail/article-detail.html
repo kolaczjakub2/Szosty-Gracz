@@ -2,23 +2,22 @@
 
 <section class="article-detail">
   <button
-    matButton
     type="button"
     class="article-detail__back"
     aria-label="Wróć do listy"
     (click)="closed.emit()"
   >
-    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    <app-icon name="arrow_back" />
     Wróć do listy
   </button>
 
   @if (vm.loading) {
     <div class="loading-state article-detail__loading">
-      <mat-spinner diameter="44"></mat-spinner>
+      <span class="ui-spinner" role="status" aria-label="Ładowanie"></span>
     </div>
   } @else if (vm.error) {
     <div class="error-state">
-      <mat-icon>cloud_off</mat-icon>
+      <app-icon name="cloud_off" />
       <p>{{ vm.error }}</p>
     </div>
   } @else if (vm.article; as article) {
@@ -28,6 +27,21 @@
       (termSelected)="termSelected.emit($event)"
     />
 
-    <app-article-comments [comments]="vm.comments" [commentCount]="vm.commentCount" />
+    @defer (hydrate on viewport) {
+      <app-article-recommendations
+        [relatedArticles]="vm.relatedArticles"
+        [authorArticles]="vm.authorArticles"
+        [authorName]="article.authorName"
+        (articleOpened)="articleOpened.emit($event)"
+      />
+    }
+
+    @defer (hydrate on viewport) {
+      <app-article-comments
+        [postId]="article.id"
+        [comments]="vm.comments"
+        [commentCount]="vm.commentCount"
+      />
+    }
   }
 </section>

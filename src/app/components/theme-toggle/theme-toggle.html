@@ -1,0 +1,16 @@
+<button
+  type="button"
+  class="theme-toggle"
+  [class.theme-toggle--compact]="compact()"
+  [class.theme-toggle--light]="!theme.isDark()"
+  [class.theme-toggle--dark]="theme.isDark()"
+  [attr.aria-label]="theme.nextThemeLabel()"
+  [attr.title]="theme.nextThemeLabel()"
+  [attr.aria-pressed]="!theme.isDark()"
+  (click)="theme.toggle()"
+>
+  <app-icon
+    aria-hidden="true"
+    [name]="theme.isDark() ? 'dark_mode' : 'light_mode'"
+  />
+</button>

@@ -1,0 +1,151 @@
+@use 'tokens' as *;
+
+.account-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.76);
+  place-items: center;
+  backdrop-filter: blur(10px);
+}
+
+.account-dialog {
+  position: relative;
+  width: min(100%, 500px);
+  padding: 34px;
+  border: 1px solid rgba($orange, 0.32);
+  border-radius: 10px;
+  background: $surface;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62);
+
+  h2 {
+    margin: 5px 0 22px;
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 2.35rem;
+    line-height: 1;
+  }
+
+  p {
+    color: #bdb5ac;
+    line-height: 1.55;
+  }
+
+  form {
+    display: grid;
+    gap: 16px;
+  }
+
+  label {
+    display: grid;
+    gap: 7px;
+    color: #e8dfd5;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 7px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.045);
+    color: #fff7ee;
+
+    &:focus {
+      border-color: $orange;
+      box-shadow: 0 0 0 3px rgba($orange, 0.13);
+    }
+  }
+
+  form > button {
+    justify-self: start;
+    background: $orange;
+    color: #170b03;
+  }
+
+  a {
+    color: #ff8a3d;
+    font-size: 0.88rem;
+  }
+}
+
+.account-dialog__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: #bdb5ac;
+}
+
+.account-dialog__eyebrow {
+  color: $orange-light;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.account-dialog__tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+
+  button {
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    background: transparent;
+    color: #bdb5ac;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  button.active {
+    border-color: $orange;
+    background: rgba($orange, 0.12);
+    color: #ff9b58;
+  }
+}
+
+.account-dialog__message {
+  margin: 18px 0 0 !important;
+  padding: 11px 13px;
+  border-radius: 6px;
+}
+
+.account-dialog__message--error {
+  background: rgba(214, 61, 61, 0.13);
+  color: #ffaaaa !important;
+}
+
+.account-dialog__message--success {
+  background: rgba(41, 181, 133, 0.13);
+  color: #8ee7c8 !important;
+}
+
+@include mobile {
+  .account-backdrop {
+    padding: 12px;
+    place-items: end center;
+  }
+
+  .account-dialog {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 28px 20px calc(24px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border-radius: 18px 18px 12px 12px;
+  }
+
+  .account-dialog h2 {
+    font-size: 2rem;
+  }
+
+  .account-dialog__tabs button,
+  .account-dialog form > button {
+    min-height: 44px;
+  }
+}

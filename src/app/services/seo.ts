@@ -4,7 +4,7 @@ import { Meta, Title } from '@angular/platform-browser';
 
 import { ArticleDetail } from '../models/wordpress';
 import { articlePath } from '../utils/article-route';
-import { optimizedImageUrl } from '../utils/image-url';
+import { optimizedImageSrcset, optimizedImageUrl } from '../utils/image-url';
 
 interface SeoPageConfig {
   readonly title: string;
@@ -60,7 +60,7 @@ export class SeoService {
       ],
     });
 
-    this.setHomeHeroPreload(heroImageUrl);
+    this.setHomeImagePreloads(heroImageUrl);
   }
 
   setStaticPage(title: string, description: string, path: string, robots?: string): void {
@@ -86,6 +86,7 @@ export class SeoService {
         },
       },
     });
+
   }
 
   setArticle(article: ArticleDetail): void {
@@ -123,6 +124,14 @@ export class SeoService {
         inLanguage: 'pl-PL',
       },
     });
+
+    this.setPrimaryImagePreload(
+      imageUrl,
+      [480, 700],
+      700,
+      78,
+      '(max-width: 760px) 100vw, (max-width: 1200px) calc(100vw - 64px), 1120px',
+    );
   }
 
   setNotFound(): void {
@@ -213,23 +222,54 @@ export class SeoService {
     script.textContent = JSON.stringify(data);
   }
 
-  private setHomeHeroPreload(heroImageUrl?: string): void {
-    let link = this.document.head.querySelector<HTMLLinkElement>('link[data-home-hero-preload="true"]');
+  private setPrimaryImagePreload(
+    imageUrl: string | undefined,
+    widths: readonly number[],
+    fallbackWidth: number,
+    quality: number,
+    sizes: string,
+  ): void {
+    this.clearPrimaryImagePreloads();
 
-    if (!heroImageUrl) {
-      link?.remove();
+    if (!imageUrl) {
       return;
     }
 
-    if (!link) {
-      link = this.document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.setAttribute('data-home-hero-preload', 'true');
-      this.document.head.appendChild(link);
-    }
+    const link = this.createPrimaryImagePreload();
 
-    link.href = optimizedImageUrl(heroImageUrl, 720, 68);
+    link.href = optimizedImageUrl(imageUrl, fallbackWidth, quality);
+    link.setAttribute('imagesrcset', optimizedImageSrcset(imageUrl, widths));
+    link.setAttribute('imagesizes', sizes);
+  }
+
+  private setHomeImagePreloads(imageUrl: string | undefined): void {
+    this.clearPrimaryImagePreloads();
+    if (!imageUrl) return;
+
+    const mobile = this.createPrimaryImagePreload();
+    mobile.media = '(max-width: 760px)';
+    mobile.href = optimizedImageUrl(imageUrl, 480, 82);
+
+    const desktop = this.createPrimaryImagePreload();
+    desktop.media = '(min-width: 761px)';
+    desktop.href = optimizedImageUrl(imageUrl, 960, 82);
+    desktop.setAttribute('imagesrcset', optimizedImageSrcset(imageUrl, [720, 960, 1200, 1440], 82));
+    desktop.setAttribute('imagesizes', '(max-width: 1200px) 70vw, 720px');
+  }
+
+  private createPrimaryImagePreload(): HTMLLinkElement {
+    const link = this.document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.setAttribute('data-primary-image-preload', 'true');
+    this.document.head.appendChild(link);
+    return link;
+  }
+
+  private clearPrimaryImagePreloads(): void {
+    this.document.head
+      .querySelectorAll<HTMLLinkElement>('link[data-primary-image-preload="true"]')
+      .forEach((link) => link.remove());
   }
 
   private absoluteUrl(pathOrUrl: string): string {

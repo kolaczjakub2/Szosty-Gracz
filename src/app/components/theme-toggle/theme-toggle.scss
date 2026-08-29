@@ -1,0 +1,79 @@
+@use '../../styles/tokens' as *;
+
+:host {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: 2px;
+}
+
+.theme-toggle {
+  position: relative;
+  display: grid;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--sg-line, rgba(255, 255, 255, 0.12));
+  border-radius: 11px;
+  background: var(--sg-control-bg, rgba(255, 255, 255, 0.045));
+  color: var(--sg-text);
+  cursor: pointer;
+  box-shadow: none;
+  place-items: center;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+    margin: 0 !important;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--sg-accent-border);
+    background: var(--sg-accent-soft);
+    color: var(--sg-accent-text);
+    outline: none;
+  }
+
+  &:active {
+    transform: scale(.95);
+  }
+}
+
+.theme-toggle--light {
+  color: #ff7b22;
+}
+
+.theme-toggle--dark {
+  color: #ff6a00;
+}
+
+.theme-toggle--compact {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  margin-left: 0;
+}
+
+@include compact-mobile {
+  .theme-toggle {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 10px;
+
+    app-icon {
+      width: 19px;
+      height: 19px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle { transition: none; }
+}

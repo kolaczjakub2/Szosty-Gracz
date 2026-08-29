@@ -10,7 +10,11 @@ export interface WpFeaturedMedia {
   source_url: string;
   alt_text?: string;
   media_details?: {
+    width?: number;
+    height?: number;
     sizes?: {
+      thumbnail?: WpMediaSize;
+      medium?: WpMediaSize;
       medium_large?: WpMediaSize;
       large?: WpMediaSize;
       full?: WpMediaSize;
@@ -28,6 +32,7 @@ export interface WpTerm {
 
 export interface WpPost {
   id: number;
+  slug: string;
   author: number;
   date: string;
   link: string;
@@ -35,6 +40,7 @@ export interface WpPost {
   excerpt: WpRenderedText;
   content?: WpRenderedText;
   categories: number[];
+  featured_media?: number;
   _embedded?: {
     author?: Array<{
       name: string;
@@ -50,15 +56,20 @@ export interface WpComment {
   date: string;
   content: WpRenderedText;
   parent: number;
+  author_avatar_urls?: Record<string, string>;
 }
 
 export interface Article {
   id: number;
+  slug: string;
   title: string;
   excerpt: string;
   link: string;
   date: Date;
   imageUrl: string;
+  thumbnailUrl?: string;
+  heroImageUrl?: string;
+  heroImageWidth?: number;
   imageAlt: string;
   category: string;
   primaryTerm?: ArticleTerm;
@@ -83,7 +94,10 @@ export interface ArticleTag extends ArticleTerm {
 }
 
 export interface ArticleDetail extends Article {
+  authorId: number;
+  authorSlug: string;
   authorName: string;
+  authorAvatarUrl?: string;
   contentHtml: string;
   tags: ArticleTag[];
 }
@@ -95,6 +109,9 @@ export interface ArticleComment {
   contentHtml: string;
   parentId: number;
   depth: number;
+  avatarUrl?: string;
+  likeCount: number;
+  liked: boolean;
 }
 
 export interface ArticleDetailViewModel {
@@ -103,6 +120,8 @@ export interface ArticleDetailViewModel {
   article?: ArticleDetail;
   comments: ArticleComment[];
   commentCount: number;
+  relatedArticles: Article[];
+  authorArticles: Article[];
 }
 
 export interface HomeViewModel {

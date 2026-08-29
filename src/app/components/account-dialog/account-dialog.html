@@ -1,0 +1,40 @@
+<div class="account-backdrop" role="presentation" (click)="closed.emit()">
+  <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-title" (click)="$event.stopPropagation()">
+    <button class="account-dialog__close" type="button" aria-label="Zamknij" (click)="closed.emit()">
+      <app-icon name="close" />
+    </button>
+
+    @if (auth.authenticated()) {
+      <span class="account-dialog__eyebrow">Twoje konto</span>
+      <h2 id="account-title">Cześć, {{ auth.user()?.name }}</h2>
+      <p>Jesteś zalogowany jako {{ auth.user()?.email }}.</p>
+      <button matButton="filled" type="button" (click)="auth.logout(); closed.emit()">Wyloguj się</button>
+    } @else {
+      <span class="account-dialog__eyebrow">Społeczność 6G</span>
+      <h2 id="account-title">{{ mode() === 'login' ? 'Zaloguj się' : 'Utwórz konto' }}</h2>
+
+      <div class="account-dialog__tabs" role="tablist">
+        <button type="button" [class.active]="mode() === 'login'" (click)="switchMode('login')">Logowanie</button>
+        <button type="button" [class.active]="mode() === 'register'" (click)="switchMode('register')">Rejestracja</button>
+      </div>
+
+      @if (mode() === 'login') {
+        <form (ngSubmit)="submitLogin()">
+          <label>Nazwa użytkownika lub e-mail<input name="login" autocomplete="username" required [(ngModel)]="login" /></label>
+          <label>Hasło<input name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" /></label>
+          <button matButton="filled" type="submit" [disabled]="busy()">{{ busy() ? 'Logowanie…' : 'Zaloguj się' }}</button>
+          <a routerLink="/moje-konto/forgot-password" (click)="closed.emit()">Nie pamiętasz hasła?</a>
+        </form>
+      } @else {
+        <form (ngSubmit)="submitRegistration()">
+          <label>Adres e-mail<input name="email" type="email" autocomplete="email" required [(ngModel)]="email" /></label>
+          <p>Wyślemy Ci bezpieczny odnośnik do ustawienia hasła.</p>
+          <button matButton="filled" type="submit" [disabled]="busy()">{{ busy() ? 'Wysyłanie…' : 'Zarejestruj się' }}</button>
+        </form>
+      }
+
+      @if (error()) { <p class="account-dialog__message account-dialog__message--error" role="alert">{{ error() }}</p> }
+      @if (success()) { <p class="account-dialog__message account-dialog__message--success" role="status">{{ success() }}</p> }
+    }
+  </section>
+</div>

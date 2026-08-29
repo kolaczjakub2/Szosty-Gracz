@@ -1,13 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 
 import { NavItem } from '../../models/ui';
 
 @Component({
   selector: 'app-header-nav',
-  imports: [MatButtonModule],
   templateUrl: './header-nav.html',
-  styles: [':host { display: contents; }'],
+  styles: [':host { display: block; min-height: 0; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderNav {
@@ -16,6 +14,12 @@ export class HeaderNav {
   readonly navItemSelected = output<NavItem>();
 
   navItemKey(item: NavItem): string {
-    return `${item.taxonomy}:${item.slug}`;
+    return item.path ? `page:${item.path}` : `${item.taxonomy}:${item.slug}`;
+  }
+
+  navItemHref(item: NavItem): string {
+    if (item.path) return item.path;
+    const parameter = item.taxonomy === 'post_tag' ? 'tag' : 'category';
+    return `/?${parameter}=${encodeURIComponent(item.slug)}`;
   }
 }

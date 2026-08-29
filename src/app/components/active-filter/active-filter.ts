@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 import { TeamFilter } from '../../models/ui';
+import { UiIcon } from '../ui-icon/ui-icon';
 
 @Component({
   selector: 'app-active-filter',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [UiIcon],
   templateUrl: './active-filter.html',
   styles: [':host { display: contents; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,

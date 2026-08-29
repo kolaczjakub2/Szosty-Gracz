@@ -14,8 +14,12 @@ export function optimizedImageUrl(url: string, width: number, quality = 76): str
   return `/.netlify/images?${params.toString()}`;
 }
 
-export function optimizedImageSrcset(url: string, widths: readonly number[]): string {
-  return widths.map((width) => `${optimizedImageUrl(url, width)} ${width}w`).join(', ');
+export function optimizedImageSrcset(
+  url: string,
+  widths: readonly number[],
+  quality = 76,
+): string {
+  return widths.map((width) => `${optimizedImageUrl(url, width, quality)} ${width}w`).join(', ');
 }
 
 function shouldUseNetlifyImageService(): boolean {

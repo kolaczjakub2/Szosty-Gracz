@@ -1,0 +1,37 @@
+<a
+  class="history-card"
+  [class]="'history-card history-card--' + variant()"
+  [href]="articlePath(article())"
+  (click)="$event.preventDefault(); articleOpened.emit(article())"
+>
+  <span class="history-card__media">
+    <img
+      class="history-card__media-backdrop"
+      [src]="optimizedImageUrl(article().thumbnailUrl || article().imageUrl, 320, 42)"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+    />
+    <img
+      class="history-card__media-image"
+      [src]="optimizedImageUrl(article().thumbnailUrl || article().imageUrl, variant() === 'wide' ? 420 : 320, 72)"
+      [srcset]="optimizedImageSrcset(article().thumbnailUrl || article().imageUrl, [220, 320, 420, 640])"
+      [alt]="article().imageAlt"
+      loading="lazy"
+      decoding="async"
+      width="420"
+      height="260"
+    />
+  </span>
+  <span class="history-card__body">
+    <span class="history-card__date">{{ article().date | date: 'dd.MM.yyyy' }} <i></i> {{ article().date | date: 'HH:mm' }}</span>
+    <strong>{{ article().title }}</strong>
+    @if (variant() !== 'side') {
+      <span class="history-card__excerpt">{{ article().excerpt }}</span>
+    }
+    @if (variant() === 'lead' || variant() === 'feature' || variant() === 'wide') {
+      <span class="history-card__link">Czytaj więcej <app-icon name="arrow_forward" /></span>
+    }
+  </span>
+</a>

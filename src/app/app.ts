@@ -17,14 +17,19 @@ import { filter, switchMap } from 'rxjs';
 import { ArticleDetail } from './components/article-detail/article-detail';
 import { AccountDialog } from './components/account-dialog/account-dialog';
 import { HomeFeed } from './components/home-feed/home-feed';
+import { CookieConsent } from './components/cookie-consent/cookie-consent';
+import { PwaInstallPrompt } from './components/pwa-install-prompt/pwa-install-prompt';
 import { ScrollTop } from './components/scroll-top/scroll-top';
+import { SearchResults } from './components/search-results/search-results';
 import { SiteFooter } from './components/site-footer/site-footer';
 import { SiteHeader } from './components/site-header/site-header';
 import { LOGO_URL, NAV_ITEMS, TEAMS } from './data/site-data';
 import { NavItem, TeamFilter } from './models/ui';
 import { Article, ArticleDetailViewModel, ArticleTag, ArticleTerm, HomeViewModel } from './models/wordpress';
 import { ArticleFeed } from './services/article-feed';
+import { AnalyticsService } from './services/analytics';
 import { FeedUrlState } from './services/feed-url-state';
+import { PushNotificationsService } from './services/push-notifications';
 import { SeoService } from './services/seo';
 import {
   ArchiveRequest,
@@ -45,11 +50,13 @@ interface FeedSelection {
 
 @Component({
   selector: 'app-root',
-  imports: [AccountDialog, ArticleDetail, HomeFeed, RouterOutlet, ScrollTop, SiteFooter, SiteHeader],
+  imports: [AccountDialog, ArticleDetail, CookieConsent, HomeFeed, PwaInstallPrompt, RouterOutlet, ScrollTop, SearchResults, SiteFooter, SiteHeader],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  readonly analytics = inject(AnalyticsService);
+  readonly pushNotifications = inject(PushNotificationsService);
   private readonly articleFeed = inject(ArticleFeed);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
@@ -62,18 +69,23 @@ export class App {
   readonly logoUrl = LOGO_URL;
   readonly navItems = NAV_ITEMS;
   readonly teams = TEAMS;
-  readonly selectedTeam = signal<TeamFilter | null>(null);
-  readonly selectedTag = signal<ArticleTag | null>(null);
-  readonly selectedCategory = signal<ArticleTerm | null>(null);
-  readonly selectedPostId = signal<number | null>(null);
-  readonly archivePage = signal(1);
+  private readonly initialUrlState = this.urlState.readCurrentState(this.teams);
+  readonly selectedTeam = signal<TeamFilter | null>(this.initialUrlState.team);
+  readonly searchQuery = signal(this.initialUrlState.query);
+  readonly selectedTag = signal<ArticleTag | null>(this.initialUrlState.tag);
+  readonly selectedCategory = signal<ArticleTerm | null>(this.initialUrlState.category);
+  readonly selectedPostId = signal<number | null>(this.initialUrlState.postId);
+  readonly archivePage = signal(this.initialUrlState.archivePage);
   readonly accountOpen = signal(false);
   readonly randomArchiveArticles = signal<readonly Article[]>([]);
   readonly randomArchiveLoading = signal(false);
+  readonly randomArchiveError = signal(false);
   readonly aboutPageOpen = signal(false);
   readonly authorPageOpen = signal(false);
   readonly supportPageOpen = signal(false);
   readonly matchAlertPageOpen = signal(false);
+  readonly historyPageOpen = signal(false);
+  readonly currentPath = signal('/');
   readonly accountPageOpen = signal(false);
   readonly accountProfilePageOpen = signal(false);
   readonly notFoundPageOpen = signal(false);
@@ -83,12 +95,16 @@ export class App {
       this.authorPageOpen() ||
       this.supportPageOpen() ||
       this.matchAlertPageOpen() ||
+      this.historyPageOpen() ||
       this.accountPageOpen() ||
       this.accountProfilePageOpen() ||
       this.notFoundPageOpen(),
   );
 
   readonly selectedFeed = computed<SelectedFeed>(() => {
+    const query = this.searchQuery();
+    if (query) return { type: 'search', query };
+
     const tag = this.selectedTag();
 
     if (tag) {
@@ -115,12 +131,9 @@ export class App {
     page: this.archivePage(),
   }));
 
-  readonly leadViewModel = toSignal(
-    toObservable(this.selectedFeed).pipe(
-      switchMap((feed) => this.articleFeed.getHomeViewModel(feed, 1)),
-    ),
-    { initialValue: createLoadingHomeViewModel() },
-  );
+  readonly leadViewModel = toSignal(this.articleFeed.getFeaturedHomeViewModel(), {
+    initialValue: createLoadingHomeViewModel(),
+  });
 
   readonly archiveViewModel = toSignal(
     toObservable(this.selectedArchiveRequest).pipe(
@@ -138,7 +151,9 @@ export class App {
   );
 
   readonly activeNavItemKey = computed(() =>
-    getActiveNavItemKey(this.selectedTag(), this.selectedCategory()),
+    this.navItems.some((item) => item.path === this.currentPath())
+      ? `page:${this.currentPath()}`
+      : getActiveNavItemKey(this.selectedTag(), this.selectedCategory()),
   );
 
   readonly allFeedSelected = computed(() =>
@@ -190,6 +205,7 @@ export class App {
         this.authorPageOpen(),
         this.supportPageOpen(),
         this.matchAlertPageOpen(),
+        this.historyPageOpen(),
         this.accountPageOpen(),
         this.accountProfilePageOpen(),
         this.notFoundPageOpen(),
@@ -199,11 +215,13 @@ export class App {
 
   loadRandomArchive(): void {
     if (this.randomArchiveLoading()) return;
+    this.randomArchiveError.set(false);
     this.randomArchiveLoading.set(true);
     this.articleFeed.getRandomArchivePosts(4).subscribe({
       next: (articles) => this.randomArchiveArticles.set(articles),
       error: () => {
         this.randomArchiveArticles.set([]);
+        this.randomArchiveError.set(true);
         this.randomArchiveLoading.set(false);
       },
       complete: () => this.randomArchiveLoading.set(false),
@@ -219,22 +237,64 @@ export class App {
       return;
     }
 
-    const observer = new IntersectionObserver(
+    let requested = false;
+    let observer: IntersectionObserver | null = null;
+
+    const requestArticles = () => {
+      if (requested) return;
+      requested = true;
+      observer?.disconnect();
+      view.removeEventListener('scroll', checkSectionPosition);
+      this.loadRandomArchive();
+    };
+
+    const checkSectionPosition = () => {
+      if (section.getBoundingClientRect().top <= view.innerHeight + 500) {
+        requestArticles();
+      }
+    };
+
+    observer = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
-        this.loadRandomArchive();
+        if (entries.some((entry) => entry.isIntersecting)) {
+          requestArticles();
+        }
       },
       { rootMargin: '500px 0px' },
     );
 
     observer.observe(section);
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    view.addEventListener('scroll', checkSectionPosition, { passive: true });
+    checkSectionPosition();
+    this.destroyRef.onDestroy(() => {
+      observer?.disconnect();
+      view.removeEventListener('scroll', checkSectionPosition);
+    });
   }
 
   openArticle(article: Article): void {
     this.selectedPostId.set(article.id);
     this.urlState.openArticle(article);
+    this.scrollToTop();
+  }
+
+  search(query: string): void {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) return;
+    this.resetArchivePage();
+    this.selectedPostId.set(null);
+    this.selectedTeam.set(null);
+    this.selectedTag.set(null);
+    this.selectedCategory.set(null);
+    this.searchQuery.set(normalizedQuery);
+    this.urlState.setSearch(normalizedQuery);
+    this.scrollToTop();
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.resetArchivePage();
+    this.urlState.setSearch(null);
     this.scrollToTop();
   }
 
@@ -264,6 +324,12 @@ export class App {
   }
 
   selectNavItem(item: NavItem): void {
+    if (item.path) {
+      void this.router.navigateByUrl(item.path);
+      this.scrollToTop();
+      return;
+    }
+
     if (item.taxonomy === 'post_tag') {
       this.selectTag({
         id: item.id,
@@ -316,11 +382,13 @@ export class App {
   private syncUrlState(): void {
     const state = this.urlState.readCurrentState(this.teams);
     const path = this.router.url.split(/[?#]/, 1)[0].replace(/\/+$/, '') || '/';
+    this.currentPath.set(path);
 
     this.aboutPageOpen.set(path === '/o-nas');
     this.authorPageOpen.set(path.startsWith('/autor/'));
     this.supportPageOpen.set(path === '/wspieraj');
     this.matchAlertPageOpen.set(path === '/alert-meczowy');
+    this.historyPageOpen.set(path === '/historia-nba');
     this.accountPageOpen.set(
       path === '/moje-konto/login' ||
       path === '/moje-konto/forgot-password' ||
@@ -336,6 +404,7 @@ export class App {
         '/o-nas',
         '/wspieraj',
         '/alert-meczowy',
+        '/historia-nba',
         '/moje-konto',
         '/moje-konto/login',
         '/moje-konto/forgot-password',
@@ -343,6 +412,7 @@ export class App {
       ].includes(path) && !path.startsWith('/artykul/') && !path.startsWith('/autor/')),
     );
     this.selectedTeam.set(state.team);
+    this.searchQuery.set(state.query);
     this.selectedTag.set(state.tag);
     this.selectedCategory.set(state.category);
     this.selectedPostId.set(state.postId);
@@ -352,6 +422,7 @@ export class App {
   private selectFeed(selection: FeedSelection = {}, scrollToTop = false): void {
     this.resetArchivePage();
     this.selectedPostId.set(null);
+    this.searchQuery.set('');
     this.selectedTeam.set(selection.team ?? null);
     this.selectedTag.set(selection.tag ?? null);
     this.selectedCategory.set(selection.category ?? null);
@@ -401,6 +472,7 @@ export class App {
     authorPageOpen: boolean,
     supportPageOpen: boolean,
     matchAlertPageOpen: boolean,
+    historyPageOpen: boolean,
     accountPageOpen: boolean,
     accountProfilePageOpen: boolean,
     notFoundPageOpen: boolean,
@@ -439,6 +511,15 @@ export class App {
         'Alert meczowy | Szósty Gracz',
         'Bez spoilerów podpowiadamy, które mecze NBA minionej nocy warto obejrzeć z odtworzenia.',
         '/alert-meczowy',
+      );
+      return;
+    }
+
+    if (historyPageOpen) {
+      this.seo.setStaticPage(
+        'Historia NBA | Szósty Gracz',
+        'Najciekawsze historie NBA: wielkie dynastie, lata 90., Jordan, Kobe, LeBron, Warriors i pełne archiwum tekstów Szóstego Gracza.',
+        '/historia-nba',
       );
       return;
     }

@@ -1,0 +1,29 @@
+<section class="random-archive" aria-labelledby="random-archive-title">
+  <header>
+    <div>
+      <span>Z głębi archiwum</span>
+      <h3 id="random-archive-title">Może ominęło Cię coś dobrego?</h3>
+      <p>Losowe, ponadczasowe materiały wybrane z najlepszych kategorii archiwum.</p>
+    </div>
+    <button type="button" [disabled]="loading()" (click)="randomRequested.emit()">
+      <app-icon name="casino" />{{ loading() ? 'Losowanie…' : 'Losuj ponownie' }}
+    </button>
+  </header>
+
+  <div class="random-archive__grid" [class.random-archive__grid--loading]="loading()">
+    @for (article of articles(); track article.id) {
+      <app-archive-card [article]="article" (articleOpened)="articleOpened.emit($event)" />
+    } @empty {
+      @if (error()) {
+        <div class="random-archive__error" role="status">
+          <strong>Nie udało się wczytać artykułów.</strong>
+          <span>Spróbuj ponownie za chwilę.</span>
+        </div>
+      } @else {
+        @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+          <span class="random-archive__placeholder" aria-hidden="true"></span>
+        }
+      }
+    }
+  </div>
+</section>

@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 
-import { ArticleTag, ArticleTerm } from '../models/wordpress';
 import { TeamFilter } from '../models/ui';
+import { Article, ArticleTag, ArticleTerm } from '../models/wordpress';
 import { labelFromSlug } from '../utils/feed-view-model';
 
 export interface InitialFeedUrlState {
+  query: string;
   team: TeamFilter | null;
   tag: ArticleTag | null;
   category: ArticleTerm | null;
@@ -18,19 +20,21 @@ interface FeedSelectionParams {
   category?: ArticleTerm | null;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class FeedUrlState {
-  readInitialState(teams: readonly TeamFilter[]): InitialFeedUrlState {
-    const params = new URLSearchParams(window.location.search);
-    const teamCode = params.get('team');
-    const tagSlug = params.get('tag');
-    const categorySlug = params.get('category');
-    const postId = Number(params.get('post'));
-    const archivePage = Number(params.get('page'));
+  private readonly router = inject(Router);
+
+  readCurrentState(teams: readonly TeamFilter[]): InitialFeedUrlState {
+    const route = this.deepestRoute(this.router.routerState.snapshot.root);
+    const queryParams = route.queryParamMap;
+    const teamCode = queryParams.get('team');
+    const tagSlug = queryParams.get('tag');
+    const categorySlug = queryParams.get('category');
+    const postId = Number(route.paramMap.get('id'));
+    const archivePage = Number(queryParams.get('page'));
 
     return {
+      query: queryParams.get('q')?.trim() ?? '',
       team: teams.find((item) => item.code === teamCode) ?? null,
       tag: tagSlug
         ? {
@@ -54,39 +58,48 @@ export class FeedUrlState {
   }
 
   replaceFeedSelection(selection: FeedSelectionParams): void {
-    const url = new URL(window.location.href);
-
-    this.setOptionalParam(url, 'team', selection.team?.code ?? null);
-    this.setOptionalParam(url, 'tag', selection.tag?.slug ?? null);
-    this.setOptionalParam(url, 'category', selection.category?.slug ?? null);
-    this.setOptionalParam(url, 'post', null);
-    this.setOptionalParam(url, 'page', null);
-    this.replaceUrl(url);
+    void this.router.navigate(['/'], {
+      queryParams: {
+        team: selection.team?.code ?? null,
+        tag: selection.tag?.slug ?? null,
+        category: selection.category?.slug ?? null,
+      },
+      replaceUrl: true,
+    });
   }
 
-  setPost(postId: number | null): void {
-    this.updateParam('post', postId ? postId.toString() : null);
+  setSearch(query: string | null): void {
+    void this.router.navigate(['/'], {
+      queryParams: { q: query?.trim() || null },
+      replaceUrl: true,
+    });
+  }
+
+  openArticle(article: Article): void {
+    void this.router.navigate(['/artykul', article.id, article.slug], {
+      queryParamsHandling: 'preserve',
+    });
+  }
+
+  closeArticle(): void {
+    void this.router.navigate(['/'], { queryParamsHandling: 'preserve' });
   }
 
   setPage(page: number | null): void {
-    this.updateParam('page', page && page > 1 ? page.toString() : null);
+    void this.router.navigate(['/'], {
+      queryParams: { page: page && page > 1 ? page : null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
-  private updateParam(name: string, value: string | null): void {
-    const url = new URL(window.location.href);
-    this.setOptionalParam(url, name, value);
-    this.replaceUrl(url);
-  }
+  private deepestRoute(route: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
+    let current = route;
 
-  private setOptionalParam(url: URL, name: string, value: string | null): void {
-    if (value) {
-      url.searchParams.set(name, value);
-    } else {
-      url.searchParams.delete(name);
+    while (current.firstChild) {
+      current = current.firstChild;
     }
-  }
 
-  private replaceUrl(url: URL): void {
-    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    return current;
   }
 }

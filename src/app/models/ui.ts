@@ -4,6 +4,7 @@ export interface NavItem {
   name: string;
   slug: string;
   taxonomy: 'category' | 'post_tag';
+  path?: string;
 }
 
 export interface TeamFilter {

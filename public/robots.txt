@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /moje-konto/
+
+Sitemap: https://szostygracz.pl/sitemap.xml

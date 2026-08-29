@@ -19,7 +19,15 @@
       [title]="team.name"
       (click)="teamSelected.emit(team)"
     >
-      <img [src]="team.logoUrl" [alt]="team.code" loading="lazy" />
+      <img
+        [src]="optimizedImageUrl(team.logoUrl, 48, 60)"
+        [alt]="team.code"
+        loading="lazy"
+        decoding="async"
+        fetchpriority="low"
+        width="48"
+        height="48"
+      />
       <span>{{ team.code }}</span>
     </button>
   }

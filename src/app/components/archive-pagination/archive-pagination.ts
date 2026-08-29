@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { UiIcon } from '../ui-icon/ui-icon';
 
 @Component({
   selector: 'app-archive-pagination',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [UiIcon],
   templateUrl: './archive-pagination.html',
   styles: [':host { display: contents; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -118,14 +118,13 @@
     padding: 294px 18px 82px;
 
     h1 {
-      display: flex;
-      align-items: flex-end;
-      flex: 0 0 clamp(5.7rem, 24vw, 5.9rem);
+      display: block;
+      flex: 0 0 auto;
       width: 100%;
       max-width: 100%;
-      height: clamp(5.7rem, 24vw, 5.9rem);
-      min-height: clamp(5.7rem, 24vw, 5.9rem);
-      margin: 8px 0 8px;
+      height: auto;
+      min-height: 0;
+      margin: 10px 0 8px;
       overflow: hidden;
       font-size: clamp(1.72rem, 7.6vw, 2.05rem);
       line-height: 1.07;

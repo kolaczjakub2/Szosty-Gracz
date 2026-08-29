@@ -8,7 +8,10 @@
 }
 
 .page-shell {
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .shell {
@@ -1541,8 +1544,8 @@ main.shell {
 
   .hero-story,
   .hero-story__content {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
+    width: 100%;
+    max-width: 100%;
     height: 500px;
     min-height: 500px;
   }
@@ -1618,8 +1621,8 @@ main.shell {
   }
 
   .story-deck {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
+    width: 100%;
+    max-width: 100%;
     display: flex;
     overflow-x: auto;
     padding-bottom: 2px;
@@ -1650,8 +1653,8 @@ main.shell {
   }
 
   .panel {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
+    width: 100%;
+    max-width: 100%;
   }
 
   .archive-panel {

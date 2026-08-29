@@ -38,6 +38,10 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+/.codex-*.log
+/.codex-netlify-production-*.zip
+/.lighthouse-*.json
+/deno.lock
 
 # System files
 .DS_Store
